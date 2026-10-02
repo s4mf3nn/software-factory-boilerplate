@@ -7,7 +7,8 @@ import { afterEach, describe, expect, it } from "vitest";
 interface InitFactory {
   TOKEN_FILES: string[];
   applyTokens(text: string, values: Record<string, string>): string;
-  init(dir: string, name?: string, owner?: string): void;
+  applyPhase(text: string, phase: string): string;
+  init(dir: string, name?: string, owner?: string, options?: { phase?: string; description?: string }): void;
 }
 const mod = (await import(pathToFileURL(path.resolve("scripts/init-factory.mjs")).href)) as InitFactory;
 
@@ -24,11 +25,12 @@ function newRepo(): string {
   dirs.push(dir);
   const files: Record<string, string> = {
     "README.md": "# Guide du boilerplate\n",
-    "README.project.md": "# {{PROJECT_NAME}}\n",
+    "README.project.md": "# {{PROJECT_NAME}}\n\n<!-- À compléter : une phrase sur le produit. -->\nProjet développé.\n",
     "CLAUDE.md": "# CLAUDE.md : {{PROJECT_NAME}}\n",
     ".github/CODEOWNERS": "/specs/ @{{GITHUB_OWNER}}\n/scripts/ @{{GITHUB_OWNER}}\n",
     "package.json": '{ "name": "software-factory-boilerplate", "private": true }\n',
-    "docs/factory/WORKFLOW.md": "inchangé {{PROJECT_NAME}}\n",
+    "docs/factory/WORKFLOW.md": "inchangé {{PROJECT_NAME}}\nPhase en cours : 1.\n",
+    ".claude/commands/init-project.md": "",
     "scripts/init-factory.mjs": "",
     "tests/unit/init-factory.test.ts": "",
   };
@@ -49,7 +51,9 @@ describe("scripts/init-factory.mjs", () => {
   it("personnalise le dépôt, déplace le guide et se supprime", () => {
     const dir = newRepo();
     mod.init(dir, "mon-projet", "mon-org/equipe");
-    expect(read(dir, "README.md")).toBe("# mon-projet\n");
+    expect(read(dir, "README.md")).toBe(
+      "# mon-projet\n\n<!-- À compléter : une phrase sur le produit. -->\nProjet développé.\n",
+    );
     expect(read(dir, "docs/factory/BOILERPLATE.md")).toBe("# Guide du boilerplate\n");
     expect(read(dir, "CLAUDE.md")).toBe("# CLAUDE.md : mon-projet\n");
     expect(read(dir, ".github/CODEOWNERS")).toBe("/specs/ @mon-org/equipe\n/scripts/ @mon-org/equipe\n");
@@ -57,12 +61,30 @@ describe("scripts/init-factory.mjs", () => {
     expect(fs.existsSync(path.join(dir, "README.project.md"))).toBe(false);
     expect(fs.existsSync(path.join(dir, "scripts/init-factory.mjs"))).toBe(false);
     expect(fs.existsSync(path.join(dir, "tests/unit/init-factory.test.ts"))).toBe(false);
+    expect(fs.existsSync(path.join(dir, ".claude/commands/init-project.md"))).toBe(false);
+  });
+
+  it("fixe la phase d'autonomie et la description du produit", () => {
+    const dir = newRepo();
+    mod.init(dir, "mon-projet", "moi", { phase: "2", description: "Un raccourcisseur d'URL." });
+    expect(read(dir, "docs/factory/WORKFLOW.md")).toBe("inchangé {{PROJECT_NAME}}\nPhase en cours : 2.\n");
+    expect(read(dir, "README.md")).toBe("# mon-projet\n\nUn raccourcisseur d'URL.\n\nProjet développé.\n");
+  });
+
+  it("garde la phase 1 par défaut", () => {
+    expect(mod.applyPhase("Phase en cours : 1.", "1")).toBe("Phase en cours : 1.");
+  });
+
+  it("refuse une phase invalide sans rien modifier", () => {
+    const dir = newRepo();
+    expect(() => mod.init(dir, "mon-projet", "moi", { phase: "4" })).toThrow(/Phase invalide/);
+    expect(read(dir, "README.md")).toBe("# Guide du boilerplate\n");
   });
 
   it("ne touche pas aux fichiers hors de la liste", () => {
     const dir = newRepo();
     mod.init(dir, "mon-projet", "moi");
-    expect(read(dir, "docs/factory/WORKFLOW.md")).toBe("inchangé {{PROJECT_NAME}}\n");
+    expect(read(dir, "docs/factory/WORKFLOW.md")).toBe("inchangé {{PROJECT_NAME}}\nPhase en cours : 1.\n");
   });
 
   it.each([
