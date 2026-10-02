@@ -3,7 +3,7 @@ import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 interface PreReview {
-  globToRegExp(glob: string): RegExp;
+  globMatch(glob: string, file: string): boolean;
   labelGlobs(text: string, label: string): string[];
   reviewLevel(files: string[], labeler: string): string;
   inPerimeter(file: string, paths: string[]): boolean;
@@ -35,7 +35,7 @@ const labeler = `# commentaire
 
 describe("scripts/pre-review.mjs", () => {
   it("convertit les globs du labeler", () => {
-    const g = (glob: string, file: string) => mod.globToRegExp(glob).test(file);
+    const g = (glob: string, file: string) => mod.globMatch(glob, file);
     expect(g("src/features/**/service.ts", "src/features/links/service.ts")).toBe(true);
     expect(g("src/features/**/service.ts", "src/features/service.ts")).toBe(true);
     expect(g("src/features/**/service.ts", "src/features/links/repo.ts")).toBe(false);

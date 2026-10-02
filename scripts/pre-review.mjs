@@ -20,23 +20,25 @@ const norm = (p) => p.replace(/^\.\//, "").replace(/\/+$/, "");
 /** Fichiers exclus du diff montré au relecteur : générés, lockfiles, contrat (vérifié par check-contract). */
 export const DIFF_EXCLUDES = ["pnpm-lock.yaml", "*.gen.ts", "tests/acceptance"];
 
-/** Glob du labeler (`**`, `*`) vers RegExp ancrée. */
-export function globToRegExp(glob) {
-  let re = "";
-  for (let i = 0; i < glob.length; i++) {
-    const c = glob[i];
-    if (c === "*" && glob[i + 1] === "*") {
-      if (glob[i + 2] === "/") {
-        re += "(?:.*/)?";
-        i += 2;
-      } else {
-        re += ".*";
-        i += 1;
-      }
-    } else if (c === "*") re += "[^/]*";
-    else re += c.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+/** Le fichier correspond-il au glob du labeler (`**`, `*`) ? Sans RegExp dynamique (pas de risque de ReDoS). */
+export function globMatch(glob, file, g = 0, f = 0) {
+  if (g === glob.length) return f === file.length;
+  if (glob[g] === "*" && glob[g + 1] === "*") {
+    const slash = glob[g + 2] === "/";
+    const next = g + (slash ? 3 : 2);
+    for (let k = f; k <= file.length; k++) {
+      if ((!slash || k === f || file[k - 1] === "/") && globMatch(glob, file, next, k)) return true;
+    }
+    return false;
   }
-  return new RegExp(`^${re}$`);
+  if (glob[g] === "*") {
+    for (let k = f; k <= file.length; k++) {
+      if (globMatch(glob, file, g + 1, k)) return true;
+      if (file[k] === "/" || k === file.length) break;
+    }
+    return false;
+  }
+  return f < file.length && glob[g] === file[f] && globMatch(glob, file, g + 1, f + 1);
 }
 
 /** Globs listés sous une étiquette de `labeler.yml` (lecture simple : lignes `- "glob"` sous la clé). */
@@ -57,8 +59,8 @@ export function labelGlobs(labelerText, label) {
 /** `full` si un fichier est en risque élevé, `standard` si moyen, sinon `light`. */
 export function reviewLevel(files, labelerText) {
   const match = (label) => {
-    const res = labelGlobs(labelerText, label).map(globToRegExp);
-    return files.some((f) => res.some((r) => r.test(f)));
+    const globs = labelGlobs(labelerText, label);
+    return files.some((f) => globs.some((g) => globMatch(g, f)));
   };
   if (match("risk:high")) return "full";
   if (match("risk:medium")) return "standard";
