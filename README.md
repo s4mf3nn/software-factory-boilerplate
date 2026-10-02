@@ -123,6 +123,7 @@ volumes:
 - `package.json` : le script `dev` (bundler, simulateur) ; `.gitignore` : les dossiers générés par le framework (Biome suit `.gitignore`).
 - Tests de contrat et scénarios cachés : ils passent par l'interface rendue, en `SPEC-XXXX.test.tsx`.
 - Tests d'interface hors de portée de Vitest (ex. rendu React Native) : le lanceur ajouté est une nouvelle dépendance à justifier, et `pnpm verify` doit l'enchaîner.
+- Tailwind est imposé par la factory pour toute interface (NativeWind pour React Native) ; il est consigné dans l'ADR-0001, et SPEC-0000 le pose.
 - `docs/factory/RISK.md`, `.github/labeler.yml`, `docs/factory/DOMAIN-SECURITY.md` : les zones et règles par défaut visent une API.
 
 **Plusieurs applications dans le même dépôt** (ex. API et interface web ou mobile). Ajoute un paquet par application (`web/`, `mobile/`) et un `pnpm-workspace.yaml`, enchaîne `pnpm --filter <paquet> <script>` dans `typecheck` et `test:coverage`, ajoute un build à la CI et classe `<paquet>/**` en `risk:medium` (chemins d'authentification et point d'entrée en `risk:high`).
