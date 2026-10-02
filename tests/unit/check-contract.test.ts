@@ -25,7 +25,7 @@ const BASE = {
   "tests/holdout/SPEC-0001.test.ts": 'describe("scenarios", () => {});\n',
 };
 
-/** Repo whose origin/main holds BASE, with `change` applied on top as one commit. */
+/** Dépôt dont origin/main contient BASE, avec `change` appliqué par-dessus en un seul commit. */
 function repoWith(change: (repo: string) => void): string {
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), "check-contract-"));
   repos.push(repo);
