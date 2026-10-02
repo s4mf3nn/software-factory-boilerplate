@@ -8,7 +8,7 @@ PR : $ARGUMENTS
 Sans merge queue, c'est cette commande qui fait foi. Une seule PR à la fois.
 
 1. `gh pr view $ARGUMENTS --json title,labels,mergeStateStatus,isDraft,url`. Arrête-toi si la PR est en brouillon.
-2. Vérifie que `main` est saine : `gh run list --branch main --workflow gates --limit 1 --json status,conclusion,url`. Si le dernier run est en échec, arrête-toi : `main` est cassée, on la répare avant toute autre fusion. S'il est en cours, attends sa fin.
+2. Vérifie que `main` est saine : `gh run list --branch main --workflow gates --limit 1 --json status,conclusion,url`. S'il est en cours, attends sa fin. Toute conclusion autre que `success` (échec, `cancelled`, `timed_out`) : arrête-toi, `main` n'est pas prouvée saine ; relance le run (`gh run rerun`, par moi) ou répare `main` avant toute autre fusion.
 3. Attends les checks : `gh pr checks $ARGUMENTS --watch`. Ils doivent tous être verts, dont `gates`, `security` et le contrôle de la trace de revue. Sinon, arrête-toi et liste ce qui échoue. Si c'est l'étape « Scénarios cachés » de `gates`, ne cherche pas le détail et ne le transmets à aucun agent : dis-moi de suivre `docs/factory/WORKFLOW.md`, section « Scénarios cachés ».
 4. Si `mergeStateStatus` indique que la branche est en retard sur `main` ou en conflit, arrête-toi : dis-moi de lancer `/resolve` puis `/ship` dans le workspace de la tâche, puis de relancer `/land`.
 5. Présente-moi la PR dans l'ordre de lecture de `docs/factory/RISK.md` : spec, tests, résumé, verdict du relecteur, et les fichiers signalés comme incertains ou sensibles.

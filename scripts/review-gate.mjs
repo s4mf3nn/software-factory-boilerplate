@@ -4,7 +4,7 @@
 // sans changement de contenu ne l'invalide pas, une nouvelle modification oui.
 // Stocké dans <workspace>/.context/review.json (hors git).
 // Usage :
-//   node scripts/review-gate.mjs record <OK|CHANGEMENTS|BLOQUANT> [--loops N] [--model <modèle du relecteur>]
+//   node scripts/review-gate.mjs record <OK|CHANGEMENTS|BLOQUANT> [--loops N] [--model <modèle du relecteur>]   (obligatoire en zone à risque élevé)
 //   node scripts/review-gate.mjs waive "<raison>"   (humain uniquement)
 //   node scripts/review-gate.mjs check              (utilisé par le hook pre-push)
 //   node scripts/review-gate.mjs section            (bloc Markdown pour le corps de la PR)
@@ -21,6 +21,15 @@ const file = path.join(sh("git rev-parse --show-toplevel"), ".context", "review.
 function fingerprint() {
   const out = execSync(`git diff ${base}...HEAD | git patch-id --stable`, { encoding: "utf8" }).trim();
   return out.split(/\s+/)[0] ?? "";
+}
+
+/** Niveau de revue du diff (`full` en zone à risque élevé). Inconnu si le script de pré-revue ne s'exécute pas. */
+function reviewLevel() {
+  try {
+    return sh("node scripts/pre-review.mjs level");
+  } catch {
+    return "inconnu";
+  }
 }
 
 function load() {
@@ -52,6 +61,8 @@ if (cmd === "record") {
   const model = m >= 0 ? args[m + 1] : undefined;
   const patchId = fingerprint();
   if (!patchId) fail(`Diff vide par rapport à ${base} : rien à relire.`);
+  if (!model && reviewLevel() === "full")
+    fail("Zone à risque élevé : indique le modèle du relecteur (--model <modèle>), voir .claude/commands/review.md.");
   save({ verdict, patchId, loops, model, head: sh("git rev-parse HEAD"), at: new Date().toISOString() });
   console.log(`Revue enregistrée : ${verdict} (patch-id ${patchId.slice(0, 12)}, ${loops} passage(s))`);
 } else if (cmd === "waive") {

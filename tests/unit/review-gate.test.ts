@@ -53,6 +53,28 @@ describe("scripts/review-gate.mjs", () => {
     expect(gate(repo, "check").code).toBe(0);
   });
 
+  it("requires the reviewer model in a high-risk zone only", () => {
+    const repo = newRepo();
+    fs.mkdirSync(path.join(repo, "scripts"), { recursive: true });
+    fs.copyFileSync(path.resolve("scripts/pre-review.mjs"), path.join(repo, "scripts/pre-review.mjs"));
+    fs.mkdirSync(path.join(repo, ".github"), { recursive: true });
+    fs.writeFileSync(
+      path.join(repo, ".github/labeler.yml"),
+      '"risk:high":\n  - changed-files:\n      - any-glob-to-any-file:\n          - "sensitive/**"\n',
+    );
+    git(repo, "add", "-A");
+    git(repo, "commit", "-q", "-m", "tooling");
+    expect(gate(repo, "record", "OK").code).toBe(0);
+    fs.mkdirSync(path.join(repo, "sensitive"));
+    fs.writeFileSync(path.join(repo, "sensitive/a.txt"), "a");
+    git(repo, "add", "-A");
+    git(repo, "commit", "-q", "-m", "sensitive");
+    const refused = gate(repo, "record", "OK");
+    expect(refused.code).toBe(1);
+    expect(refused.err).toContain("--model");
+    expect(gate(repo, "record", "OK", "--model", "opus").code).toBe(0);
+  });
+
   it("adds no model line when none is provided", () => {
     const repo = newRepo();
     gate(repo, "record", "OK");

@@ -12,7 +12,8 @@ permissions:
 
 concurrency:
   group: gates-${{ github.ref }}
-  cancel-in-progress: true
+  # Pas d'annulation sur main : deux fusions rapprochées ne doivent pas annuler le run de la première.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   pr-title:
