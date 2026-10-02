@@ -114,7 +114,7 @@ describe("scripts/init-factory.mjs", () => {
   it("rejects a description when the README placeholder is missing, before moving anything", () => {
     const dir = newRepo();
     fs.writeFileSync(path.join(dir, "README.project.md"), "# {{PROJECT_NAME}}\n");
-    expect(() => mod.init(dir, "mon-projet", "moi", { description: "x" })).toThrow(/description/);
+    expect(() => mod.init(dir, "mon-projet", "moi", { description: "x" })).toThrow(/ligne à compléter/);
     expect(read(dir, "README.md")).toBe("# Guide du boilerplate\n");
   });
 
