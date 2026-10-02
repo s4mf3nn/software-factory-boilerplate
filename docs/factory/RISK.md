@@ -1,6 +1,6 @@
 # Zones de risque et routage
 
-La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre-review.mjs`) ; ce document explique le pourquoi. Toute modification de l'un doit être répercutée dans l'autre, et dans `.github/CODEOWNERS` pour le niveau élevé.
+La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre-review.mjs`) ; ce document explique le pourquoi. Le niveau de revue `full` (relecteur sur Opus) ne suit pas `risk:high` : il vient de l'étiquette `review:full` (auth, migrations, config, `docker-compose.yml`), pour garder Opus rare. L'outillage de la factory reste en risque élevé (revue humaine) mais se relit en `standard`. Toute modification de l'un doit être répercutée dans l'autre, et dans `.github/CODEOWNERS` pour le niveau élevé.
 
 | Niveau | Chemins | Pourquoi | Traitement |
 |---|---|---|---|

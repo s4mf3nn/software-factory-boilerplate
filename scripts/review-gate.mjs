@@ -23,7 +23,7 @@ function fingerprint() {
   return out.split(/\s+/)[0] ?? "";
 }
 
-/** Niveau de revue du diff (`full` en zone à risque élevé). Inconnu si le script de pré-revue ne s'exécute pas. */
+/** Niveau de revue du diff (`full` en zone `review:full` : code applicatif sensible). Inconnu si le script de pré-revue ne s'exécute pas. */
 function reviewLevel() {
   try {
     return sh("node scripts/pre-review.mjs level");
