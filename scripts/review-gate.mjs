@@ -4,7 +4,7 @@
 // sans changement de contenu ne l'invalide pas, une nouvelle modification oui.
 // Stocké dans <workspace>/.context/review.json (hors git).
 // Usage :
-//   node scripts/review-gate.mjs record <OK|CHANGEMENTS|BLOQUANT> [--loops N] [--model <modèle du relecteur>]   (required in review:full zone)
+//   node scripts/review-gate.mjs record <OK|CHANGEMENTS|BLOQUANT> [--loops N] [--model <modèle du relecteur>]   (obligatoire en zone review:full)
 //   node scripts/review-gate.mjs waive "<raison>"   (humain uniquement)
 //   node scripts/review-gate.mjs check              (utilisé par le hook pre-push)
 //   node scripts/review-gate.mjs section            (bloc Markdown pour le corps de la PR)

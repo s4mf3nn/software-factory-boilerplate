@@ -136,7 +136,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 ## 8. Le risque et la fusion
 
 - **Zone de risque** : ensemble de chemins classés selon ce qu'une erreur y coûterait (`RISK.md`). Élevé : sécurité du domaine, authentification, migrations, configuration, et la factory elle-même. Moyen : logique métier, schéma, dépendances. Faible : le reste.
-- **Labels de risque** : `risk:high`, `risk:medium`, `risk:low`, posés par la CI d'après `.github/labeler.yml`. Ce même fichier fixe le niveau de revue.
+- **Labels de risque** : `risk:high`, `risk:medium`, `risk:low`, posés par la CI d'après `.github/labeler.yml`. Le niveau de revue vient de là, mais découplé : `review:full` (Opus) pour les zones sensibles seulement (auth, migrations, config), `standard` (Sonnet) pour `risk:high` (outillage) et `risk:medium`, `light` (Sonnet) sinon.
 - **Label `contract`** : posé automatiquement quand une PR touche `tests/acceptance/` ou `tests/holdout/`.
 - **Code owners** : `.github/CODEOWNERS` désigne l'humain propriétaire des chemins à risque élevé.
 - **Sécurité propre au domaine** : règles de sécurité spécifiques au produit (`DOMAIN-SECURITY.md`), lues par l'agent et le relecteur sur les zones concernées.
@@ -173,7 +173,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Contexte** : tout ce que l'agent relit à chaque tour (instructions, fichiers lus, sorties de commandes). C'est le premier poste de coût.
 - **Tour** : un appel au modèle. Le **contexte moyen par tour** est l'indicateur de sobriété suivi.
 - **Tokens pondérés** : total ramené à un équivalent de coût (voir les seuils ci-dessous).
-- **Modèle et effort par commande** : chaque commande et chaque subagent peut fixer son modèle et son niveau d'effort. Les commandes mécaniques (`/ship`, `/resolve`, `/retro`) tournent sur le modèle le moins coûteux ; les subagents sur un modèle intermédiaire (le relecteur change de modèle au niveau `full` (`review:full`)) ; `/land`, qui porte les barrières de fusion, reste sur le modèle par défaut.
+- **Modèle et effort par commande** : chaque commande et chaque subagent peut fixer son modèle et son niveau d'effort. Les commandes mécaniques (`/ship`, `/resolve`, `/retro`) tournent sur Haiku ; les subagents sur Sonnet, sauf le `planner` qui passe à Opus pour la qualité du découpage ; le relecteur change de modèle au niveau `full` (`review:full`) ; `/land`, qui porte les barrières de fusion, reste sur le modèle par défaut.
 - **Sobriété en tokens** : ensemble des mesures qui réduisent le contexte relu (`TOKENS.md`) : extrait de tâche, sortie filtrée, pré-revue par script, niveaux de revue, modèle moins coûteux pour les commandes mécaniques.
 
 ## Les commandes
