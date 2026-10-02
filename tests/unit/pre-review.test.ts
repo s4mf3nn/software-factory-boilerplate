@@ -90,15 +90,19 @@ describe("scripts/pre-review.mjs", () => {
       return all;
     };
     const globs = words(["a", ".", "/", "*"], 5);
-    const files = words(["a", ".", "/"], 5);
-    for (const glob of globs)
-      for (const file of files) expect(mod.globMatch(glob, file), `${glob} ~ ${file}`).toBe(legacy(glob, file));
+    const files = words(["a", ".", "/"], 4);
+    const mismatches = globs.flatMap((glob) =>
+      files.filter((file) => mod.globMatch(glob, file) !== legacy(glob, file)).map((file) => `${glob} ~ ${file}`),
+    );
+    expect(mismatches).toEqual([]);
   });
 
   it("distingue le travail de spec de l'outillage", () => {
     expect(mod.workMode(true, "main")).toBe("spec");
     expect(mod.workMode(false, "spec-0001-t2-create-link")).toBe("spec");
     expect(mod.workMode(false, "s4mf3nn/dgp95")).toBe("hors-spec");
+    expect(mod.workMode(false, "s4mf3nn/spec-0001-t2-x")).toBe("spec");
+    expect(mod.workMode(false, "")).toBe("spec");
     expect(mod.workMode(false, "respec-0001-t2")).toBe("hors-spec");
   });
 

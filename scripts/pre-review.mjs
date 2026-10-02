@@ -120,9 +120,9 @@ export function checkSummary(summary, added) {
   return problems;
 }
 
-/** Travail de spec si le workspace a un bail ou si la branche suit `spec-xxxx-t#-*` ; sinon hors spec (outillage). */
+/** Travail de spec si bail, HEAD détaché ou branche `[préfixe/]spec-xxxx-t#-*` ; sinon hors spec (outillage). */
 export function workMode(hasLease, branch) {
-  return hasLease || /^spec-\d+-t\d+(-|$)/i.test(branch) ? "spec" : "hors-spec";
+  return hasLease || branch === "" || /^(?:[^/]+\/)?spec-\d+-t\d+(-|$)/i.test(branch) ? "spec" : "hors-spec";
 }
 
 function currentLease() {
