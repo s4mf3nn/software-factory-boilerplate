@@ -13,7 +13,7 @@ Imposé par la factory (chaîne d'outils, déjà en place dans le dépôt) :
 - Tests : Vitest, couverture v8 (seuils à 80 %), mutation avec Stryker sur les fichiers modifiés.
 - Qualité : Biome (lint et format), Lefthook, commitlint.
 - Structure par feature avec montage automatique via un fichier généré (`pnpm gen`).
-- Style : Tailwind pour toute application avec interface (NativeWind pour React Native, statut `choisie`). Dernière version stable à l'initialisation, vérifiée dans la documentation.
+- Style : Tailwind pour toute application avec interface (NativeWind pour React Native, statut `choisie`) ; sans objet pour une API ou une CLI. Dernière version stable à l'initialisation, vérifiée dans la documentation.
 
 Technologies du projet. Statuts : `imposée` (exigée par l'utilisateur ; ne change que par une nouvelle ADR), `choisie` (proposée par l'agent et validée), `à décider` (le premier travail qui en a besoin la tranche par ADR).
 

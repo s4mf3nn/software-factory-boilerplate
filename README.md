@@ -66,7 +66,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 | Fichier | Quoi |
 |---|---|
 | `CLAUDE.md` | Sections « Le projet », « Conventions de code » (selon la stack) et « Sécurité propre au domaine » |
-| `docs/adr/0001-stack.md` | Les choix laissés ouverts : type d'application, framework, validation, persistance, tests d'interface, découpage d'une feature |
+| `docs/adr/0001-stack.md` | Type d'application, tableau des technologies (imposées, choisies, à décider) et section Implications (runtime, tests, données, secrets, déploiement) |
 | `specs/SPEC-0000-bootstrap/spec.md`, `tests/acceptance/SPEC-0000.test.ts` | Critères et assertions du socle, puis statut `VALIDÉE` |
 | `docs/factory/DOMAIN-SECURITY.md` | Les règles de sécurité du domaine |
 | `docs/factory/RISK.md`, `.github/labeler.yml`, `.github/CODEOWNERS` | Les zones sensibles du domaine, dans les trois fichiers à la fois |
