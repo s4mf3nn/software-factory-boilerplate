@@ -13,7 +13,7 @@ Procédure :
 2. Vérifie dans cet ordre :
    - **Critères** : chaque `CA#` décrit un comportement observable et testable, sans mot flou (« rapide », « correct », « géré ») ni détail d'implémentation. Deux lecteurs ne doivent pas pouvoir le comprendre différemment.
    - **Couverture** : chaque `CA#` a au moins un `it` qui échouerait si le critère n'était pas tenu. Signale un `it` sans assertion, à assertion faible (`toBeDefined`, statut seul quand le corps est spécifié) ou un `it.todo` laissé dans une spec qui se dit prête.
-   - **Interface publique** : tests et scénarios ne passent que par l'interface décrite dans « Contrat d'interface » (API HTTP, CLI, composant rendu). Aucun import d'un module interne, aucun accès direct à la base.
+   - **Interface publique** : tests et scénarios ne passent que par l'interface décrite dans « Contrat d'interface » (API HTTP, CLI, écran ou composant rendu). Aucun import d'un module interne, aucun accès direct à la base.
    - **Contrat d'interface** : entrées, sorties, codes de statut et format d'erreur sont exacts et cohérents avec les tests.
    - **Cas limites** : ceux de la spec sont soit testés, soit explicitement renvoyés hors périmètre. Signale ceux qui manquent : entrée vide, doublon, concurrence, dépendance indisponible, entrée très longue.
    - **Scénarios cachés** : 2 à 4 parcours de bout en bout, sans `.skip`, qui enchaînent plusieurs critères avec **d'autres données** que les tests de contrat. Signale un scénario qui recopie un test de contrat, qui exige un comportement que la spec ne dit pas, ou que la spec décrit (l'agent producteur lit la spec).
