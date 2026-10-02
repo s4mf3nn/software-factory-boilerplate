@@ -49,18 +49,26 @@ export function init(dir, name, owner, options = {}) {
   if (!PROJECT_NAME.test(name ?? "")) throw new Error(`Nom de projet invalide : "${name ?? ""}" (kebab-case attendu)`);
   if (!GITHUB_OWNER.test(owner ?? "")) throw new Error(`Propriétaire GitHub invalide : "${owner ?? ""}"`);
   if (!PHASES.includes(phase)) throw new Error(`Phase invalide : "${phase}" (1, 2 ou 3 attendu)`);
+  if (description?.includes("\n")) throw new Error("Description invalide : une seule ligne attendue");
   const at = (p) => path.join(dir, p);
   if (!fs.existsSync(at("README.project.md")))
     throw new Error("README.project.md absent : le dépôt est déjà initialisé.");
+  // Contrôlé avant tout déplacement, pour ne jamais laisser un dépôt à moitié initialisé.
+  const workflow = at("docs/factory/WORKFLOW.md");
+  if (fs.existsSync(workflow) && !PHASE_LINE.test(fs.readFileSync(workflow, "utf8")))
+    throw new Error('WORKFLOW.md ne contient pas la ligne "Phase en cours : N."');
 
   fs.renameSync(at("README.md"), at("docs/factory/BOILERPLATE.md"));
   fs.renameSync(at("README.project.md"), at("README.md"));
 
   if (description) {
     const readme = fs.readFileSync(at("README.md"), "utf8");
-    fs.writeFileSync(at("README.md"), readme.replace(`${DESCRIPTION_PLACEHOLDER}\n`, `${description}\n\n`));
+    // Fonction de remplacement : une chaîne interpréterait les motifs `$&`, `$$`... de la description.
+    fs.writeFileSync(
+      at("README.md"),
+      readme.replace(`${DESCRIPTION_PLACEHOLDER}\n`, () => `${description}\n\n`),
+    );
   }
-  const workflow = at("docs/factory/WORKFLOW.md");
   if (fs.existsSync(workflow)) fs.writeFileSync(workflow, applyPhase(fs.readFileSync(workflow, "utf8"), phase));
 
   const values = { PROJECT_NAME: name, GITHUB_OWNER: owner };
@@ -79,12 +87,16 @@ export function init(dir, name, owner, options = {}) {
 const isMain =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(fs.realpathSync(process.argv[1])).href;
 if (isMain) {
-  const { values: flags, positionals } = parseArgs({
-    allowPositionals: true,
-    options: { phase: { type: "string" }, description: { type: "string" } },
-  });
-  const [name, owner] = positionals;
+  let name;
+  let flags = {};
   try {
+    const parsed = parseArgs({
+      allowPositionals: true,
+      options: { phase: { type: "string" }, description: { type: "string" } },
+    });
+    flags = parsed.values;
+    let owner;
+    [name, owner] = parsed.positionals;
     init(process.cwd(), name, owner, { phase: flags.phase, description: flags.description });
     console.log(
       `Factory initialisée pour ${name} (propriétaire : @${owner}, phase d'autonomie : ${flags.phase ?? "1"}).`,

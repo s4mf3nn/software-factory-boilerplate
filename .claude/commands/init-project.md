@@ -27,7 +27,7 @@ Récapitule les réponses et demande confirmation avant d'écrire quoi que ce so
 
 ## 2. Appliquer
 
-1. Lance : `node scripts/init-factory.mjs <nom> <propriétaire> --phase <1|2|3> --description "<phrase>"`. Le script remplace les jetons, fixe la phase, déplace le guide dans `docs/factory/BOILERPLATE.md`, et supprime cette commande ainsi que lui-même. S'il échoue, corrige l'entrée invalide avec l'utilisateur et relance.
+1. Lance : `node scripts/init-factory.mjs <nom> <propriétaire> --phase <1|2|3> --description '<phrase>'`. Mets la phrase entre **guillemets simples**, en remplaçant chaque `'` par `'\''` : entre guillemets doubles, le shell évaluerait les backticks, `$(...)` et `$VAR`. La phrase doit tenir sur une seule ligne. Le script remplace les jetons, fixe la phase, déplace le guide dans `docs/factory/BOILERPLATE.md`, et supprime cette commande ainsi que lui-même. S'il échoue, corrige l'entrée invalide avec l'utilisateur et relance.
 2. **Postgres** : crée `docker-compose.yml` avec le bloc de `docs/factory/BOILERPLATE.md` (section « Options »), décommente le bloc `services` et `env` de `.github/workflows/ci.yml` (sans `API_KEYS` si le projet n'en a pas), et rappelle qu'un script `db:migrate` sera nécessaire.
 3. **Interface web** : n'ajoute rien, signale que `web/` et `pnpm-workspace.yaml` seront posés par SPEC-0000 selon la section « Options » du guide.
 4. Complète `docs/adr/0001-stack.md` avec les réponses (contexte, choix de stack, conséquences) : date du jour, statut `proposée`.

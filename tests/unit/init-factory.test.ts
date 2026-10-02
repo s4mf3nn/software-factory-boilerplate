@@ -64,18 +64,44 @@ describe("scripts/init-factory.mjs", () => {
     expect(fs.existsSync(path.join(dir, ".claude/commands/init-project.md"))).toBe(false);
   });
 
-  it("fixe la phase d'autonomie et la description du produit", () => {
+  it("sets the autonomy phase and product description", () => {
     const dir = newRepo();
     mod.init(dir, "mon-projet", "moi", { phase: "2", description: "Un raccourcisseur d'URL." });
     expect(read(dir, "docs/factory/WORKFLOW.md")).toBe("inchangé {{PROJECT_NAME}}\nPhase en cours : 2.\n");
     expect(read(dir, "README.md")).toBe("# mon-projet\n\nUn raccourcisseur d'URL.\n\nProjet développé.\n");
   });
 
-  it("garde la phase 1 par défaut", () => {
-    expect(mod.applyPhase("Phase en cours : 1.", "1")).toBe("Phase en cours : 1.");
+  it("defaults to phase 1", () => {
+    const dir = newRepo();
+    fs.writeFileSync(path.join(dir, "docs/factory/WORKFLOW.md"), "Phase en cours : 3.\n");
+    mod.init(dir, "mon-projet", "moi");
+    expect(read(dir, "docs/factory/WORKFLOW.md")).toBe("Phase en cours : 1.\n");
   });
 
-  it("refuse une phase invalide sans rien modifier", () => {
+  it("supports phase 3", () => {
+    expect(mod.applyPhase("Phase en cours : 1.", "3")).toBe("Phase en cours : 3.");
+  });
+
+  it("keeps special replacement patterns of the description as plain text", () => {
+    const dir = newRepo();
+    mod.init(dir, "mon-projet", "moi", { description: "Coût : 5 $& par mois, $$" });
+    expect(read(dir, "README.md")).toContain("Coût : 5 $& par mois, $$\n");
+  });
+
+  it("rejects a multi-line description without touching files", () => {
+    const dir = newRepo();
+    expect(() => mod.init(dir, "mon-projet", "moi", { description: "a\nb" })).toThrow(/Description invalide/);
+    expect(read(dir, "README.md")).toBe("# Guide du boilerplate\n");
+  });
+
+  it("rejects a WORKFLOW.md without phase line before moving anything", () => {
+    const dir = newRepo();
+    fs.writeFileSync(path.join(dir, "docs/factory/WORKFLOW.md"), "rien\n");
+    expect(() => mod.init(dir, "mon-projet", "moi", { phase: "2" })).toThrow(/Phase en cours/);
+    expect(read(dir, "README.md")).toBe("# Guide du boilerplate\n");
+  });
+
+  it("rejects an invalid phase without touching files", () => {
     const dir = newRepo();
     expect(() => mod.init(dir, "mon-projet", "moi", { phase: "4" })).toThrow(/Phase invalide/);
     expect(read(dir, "README.md")).toBe("# Guide du boilerplate\n");
