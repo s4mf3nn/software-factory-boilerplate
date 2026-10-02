@@ -3,6 +3,7 @@
 // Usage :
 //   node scripts/pre-review.mjs check   contrôles déterministes (code 1 s'il y a une violation)
 //   node scripts/pre-review.mjs level   niveau de revue : full | standard | light (selon .github/labeler.yml)
+//   node scripts/pre-review.mjs mode    travail de spec ou hors spec (bail du workspace ou branche spec-xxxx-t#-*)
 //   node scripts/pre-review.mjs brief   niveau, contrôles, fichiers et diff filtré, pour le subagent `reviewer`
 // Contrôles : fichiers modifiés dans le périmètre du bail, tests de contrat (check-contract), dépendances ajoutées
 // et déclarées dans .pr-summary.md, section « Documentation consultée (Context7) » remplie.
@@ -20,7 +21,7 @@ const norm = (p) => p.replace(/^\.\//, "").replace(/\/+$/, "");
 /** Fichiers exclus du diff montré au relecteur : générés, lockfiles, contrat (vérifié par check-contract). */
 export const DIFF_EXCLUDES = ["pnpm-lock.yaml", "*.gen.ts", "tests/acceptance"];
 
-/** Le fichier correspond-il au glob du labeler (`**`, `*`) ? Sans RegExp dynamique (pas de risque de ReDoS). */
+/** Le fichier correspond-il au glob du labeler (`**`, `*`) ? Sans RegExp dynamique ; les globs viennent du dépôt (`labeler.yml`), pas d'une entrée utilisateur. */
 export function globMatch(glob, file, g = 0, f = 0) {
   if (g === glob.length) return f === file.length;
   if (glob[g] === "*" && glob[g + 1] === "*") {
@@ -117,6 +118,11 @@ export function checkSummary(summary, added) {
     if (!declared.has(name)) problems.push(`dépendance ajoutée non déclarée dans « Nouvelles dépendances » : ${name}`);
   }
   return problems;
+}
+
+/** Travail de spec si le workspace a un bail ou si la branche suit `spec-xxxx-t#-*` ; sinon hors spec (outillage). */
+export function workMode(hasLease, branch) {
+  return hasLease || /^spec-\d+-t\d+(-|$)/i.test(branch) ? "spec" : "hors-spec";
 }
 
 function currentLease() {
@@ -216,9 +222,10 @@ if (isMain) {
       }
       console.log("Pré-revue : OK");
     } else if (cmd === "level") console.log(level());
+    else if (cmd === "mode") console.log(workMode(currentLease() !== null, git("branch", "--show-current").trim()));
     else if (cmd === "brief") console.log(brief());
     else {
-      console.error("Usage : node scripts/pre-review.mjs check | level | brief");
+      console.error("Usage : node scripts/pre-review.mjs check | level | mode | brief");
       process.exit(2);
     }
   } catch (e) {
