@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -21,7 +23,18 @@ interface Pr {
   mergedAt: string | null;
   url: string;
 }
+interface Issue {
+  title: string;
+  body: string;
+  state: string;
+  state_reason?: string;
+  labels: { name: string }[];
+}
 interface Board {
+  readSpecs(specsDir: string): Spec[];
+  currentStatus(issue: Issue | undefined): string;
+  labelsFor(kind: string, status: string, issue?: Issue): string[];
+  sameIssue(issue: Issue, wanted: { title: string; body: string; labels: string[]; state: string }): boolean;
   taskOfBranch(branch: string): string | null;
   taskStatus(prs: Pr[], current: string): string;
   specStatus(taskStatuses: string[], declaredStatus: string): string;
@@ -57,6 +70,10 @@ describe("taskStatus", () => {
 
   it("is in-review with an open pull request", () => {
     expect(board.taskStatus([open], "in-progress")).toBe("in-review");
+  });
+
+  it("keeps a task done once its issue is closed as completed", () => {
+    expect(board.taskStatus([], "done")).toBe("done");
   });
 
   it("is done as soon as a pull request is merged", () => {
@@ -111,5 +128,90 @@ describe("issue bodies", () => {
 
   it("points to /plan when the spec has no plan yet", () => {
     expect(board.specBody({ ...spec, hasPlan: false, tasks: [] }, [])).toContain("/plan SPEC-0001");
+  });
+});
+
+describe("currentStatus", () => {
+  const issue = (over: Partial<Issue>): Issue => ({ title: "t", body: "b", state: "open", labels: [], ...over });
+
+  it("reads the status label of an open issue, todo by default", () => {
+    expect(board.currentStatus(issue({ labels: [{ name: "status:in-progress" }] }))).toBe("in-progress");
+    expect(board.currentStatus(issue({}))).toBe("todo");
+    expect(board.currentStatus(undefined)).toBe("todo");
+  });
+
+  it("treats an issue closed as completed as done", () => {
+    expect(board.currentStatus(issue({ state: "closed", state_reason: "completed" }))).toBe("done");
+  });
+});
+
+describe("labelsFor and sameIssue", () => {
+  const existing: Issue = {
+    title: "t",
+    body: "b",
+    state: "open",
+    labels: [{ name: "factory" }, { name: "task" }, { name: "status:todo" }, { name: "help wanted" }],
+  };
+
+  it("replaces only the status label and keeps manual labels", () => {
+    expect(board.labelsFor("task", "in-review", existing)).toEqual([
+      "factory",
+      "task",
+      "status:in-review",
+      "help wanted",
+    ]);
+  });
+
+  it("adds no status label for done", () => {
+    expect(board.labelsFor("task", "done", existing)).toEqual(["factory", "task", "help wanted"]);
+  });
+
+  it("keeps a manual label named like an Object prototype property", () => {
+    const odd = { ...existing, labels: [{ name: "constructor" }] };
+    expect(board.labelsFor("task", "todo", odd)).toContain("constructor");
+  });
+
+  it("detects an unchanged issue regardless of label order, so a second pass writes nothing", () => {
+    const labels = board.labelsFor("task", "todo", existing);
+    expect(board.sameIssue(existing, { title: "t", body: "b", labels: [...labels].reverse(), state: "open" })).toBe(
+      true,
+    );
+  });
+
+  it("detects a changed body or state", () => {
+    const labels = board.labelsFor("task", "todo", existing);
+    expect(board.sameIssue(existing, { title: "t", body: "autre", labels, state: "open" })).toBe(false);
+    expect(board.sameIssue(existing, { title: "t", body: "b", labels, state: "closed" })).toBe(false);
+  });
+});
+
+describe("readSpecs", () => {
+  it("reads the title, declared status and exact task bodies of a plan", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "board-"));
+    const dir = path.join(root, "SPEC-0009-demo");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(path.join(root, "_template"));
+    fs.writeFileSync(path.join(dir, "spec.md"), "# SPEC-0009 : Demo\n\nStatut : VALIDÉE\n");
+    fs.writeFileSync(
+      path.join(dir, "plan.md"),
+      [
+        "# Plan SPEC-0009",
+        "Statut : PRÊT",
+        "",
+        "## Groupe 1 (parallèle)",
+        "### T1 : Premier",
+        "- Périmètre : src/a.ts",
+        "- Définition de fini : a",
+        "### T2 : Second",
+        "- Périmètre : src/b.ts",
+      ].join("\n"),
+    );
+    const [spec] = board.readSpecs(root);
+    expect(board.readSpecs(root)).toHaveLength(1);
+    expect(spec).toMatchObject({ id: "SPEC-0009", title: "Demo", declaredStatus: "VALIDÉE", hasPlan: true });
+    expect(spec?.tasks.map((t) => t.id)).toEqual(["T1", "T2"]);
+    expect(spec?.tasks[0]?.details).toBe("- Périmètre : src/a.ts\n- Définition de fini : a");
+    expect(spec?.tasks[1]?.details).toBe("- Périmètre : src/b.ts");
+    expect(spec?.tasks[0]?.group).toBe("Groupe 1 (parallèle)");
   });
 });

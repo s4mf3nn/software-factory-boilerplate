@@ -6,7 +6,9 @@ on:
   push:
     branches: [main]
     paths: ["specs/**"]
-  pull_request:
+  # pull_request_target : le YAML et les secrets viennent de main, jamais de la branche d'une PR
+  # (le job n'exécute que le code de main, aucun code de la PR n'est extrait).
+  pull_request_target:
     types: [opened, reopened, closed, ready_for_review]
   workflow_dispatch:
 

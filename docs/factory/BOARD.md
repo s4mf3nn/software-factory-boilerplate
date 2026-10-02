@@ -23,7 +23,7 @@ Une spec passe `in-progress` dès qu'une de ses tâches a démarré, et `done` q
 Sans Project, les issues et leurs étiquettes de statut fonctionnent déjà (filtre `label:status:in-review`). Pour la vue Kanban :
 
 1. Crée un Project (vue Board) sur ton compte ou ton organisation. Dans « Status », garde les colonnes `Todo`, `In progress`, `Done` et ajoute `In review`.
-2. Crée un PAT (classic, portée `project` et `repo`) et enregistre-le comme secret de dépôt `PROJECT_TOKEN`. Le `GITHUB_TOKEN` ne peut pas écrire dans un Project utilisateur.
+2. Crée un PAT et enregistre-le comme secret de dépôt `PROJECT_TOKEN`. Le `GITHUB_TOKEN` ne peut pas écrire dans un Project utilisateur. Prends le jeton au plus faible privilège : fine-grained (dépôt + Projects + Issues en écriture) si le Project appartient à une organisation ; sinon un classic avec les portées `project` et `repo`, qui donnent accès à tous tes dépôts : garde-le exclusif à ce secret. Le workflow tourne sur `pull_request_target`, donc le secret n'est lu que depuis `main`.
 3. Ajoute la variable de dépôt `BOARD_PROJECT` = `<propriétaire>/<numéro du project>`.
 4. Lance le workflow `board` à la main (Actions → board → Run workflow).
 
@@ -33,4 +33,7 @@ En local : `BOARD_PROJECT=<propriétaire>/<numéro> node scripts/board.mjs sync`
 
 - `in-progress` n'est posé que si l'issue existe déjà au moment du bail ; sinon `/implement` continue et la carte passe directement à `in-review`.
 - Une tâche supprimée du plan garde son issue (à fermer à la main).
+- Une issue fermée comme terminée reste `done`, même si sa PR n'est plus dans les 500 dernières.
+- Une PR en brouillon compte comme `in-review`.
+- Ne retire pas l'étiquette `factory` d'une issue générée : `sync` ne la retrouverait plus et en créerait une seconde.
 - Les statuts ne remontent que si les branches de tâche respectent `spec-xxxx-t#-slug`.

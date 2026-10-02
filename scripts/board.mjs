@@ -75,7 +75,8 @@ export function taskOfBranch(branch) {
 
 /** Statut d'une tâche d'après ses PR ; `current` conserve « en cours » tant qu'aucune PR n'existe. */
 export function taskStatus(prs, current) {
-  if (prs.some((pr) => pr.mergedAt)) return "done";
+  // « done » est acquis : une PR sortie de la liste récupérée ne doit pas rouvrir la tâche.
+  if (current === "done" || prs.some((pr) => pr.mergedAt)) return "done";
   if (prs.some((pr) => pr.state === "OPEN")) return "in-review";
   return current === "in-progress" ? "in-progress" : "todo";
 }
@@ -160,16 +161,17 @@ function ensureLabels(repo, dryRun) {
   }
 }
 
-function currentStatus(issue) {
+export function currentStatus(issue) {
+  if (issue?.state === "closed" && issue.state_reason === "completed") return "done";
   const label = issue?.labels.map((l) => l.name).find((name) => name.startsWith(STATUS_LABEL_PREFIX));
   return label ? label.slice(STATUS_LABEL_PREFIX.length) : "todo";
 }
 
-function labelsFor(kind, status, issue) {
+export function labelsFor(kind, status, issue) {
   // On garde les étiquettes posées à la main, on remplace seulement celles du tableau.
   const manual = (issue?.labels ?? [])
     .map((l) => l.name)
-    .filter((n) => !(n in BASE_LABELS) && !n.startsWith(STATUS_LABEL_PREFIX));
+    .filter((n) => !Object.hasOwn(BASE_LABELS, n) && !n.startsWith(STATUS_LABEL_PREFIX));
   const statusLabel = status === "done" ? [] : [`${STATUS_LABEL_PREFIX}${status}`];
   return ["factory", kind, ...statusLabel, ...manual];
 }
@@ -196,7 +198,7 @@ function patchIssue(repo, number, fields) {
   return ghJson(["api", "-X", "PATCH", `repos/${repo}/issues/${number}`, "--input", "-"], JSON.stringify(fields));
 }
 
-function sameIssue(issue, wanted) {
+export function sameIssue(issue, wanted) {
   const labels = issue.labels.map((l) => l.name).sort();
   return (
     issue.title === wanted.title &&
