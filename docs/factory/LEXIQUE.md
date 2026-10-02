@@ -173,7 +173,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Contexte** : tout ce que l'agent relit à chaque tour (instructions, fichiers lus, sorties de commandes). C'est le premier poste de coût.
 - **Tour** : un appel au modèle. Le **contexte moyen par tour** est l'indicateur de sobriété suivi.
 - **Tokens pondérés** : total ramené à un équivalent de coût (voir les seuils ci-dessous).
-- **Modèle et effort par commande** : chaque commande et chaque subagent peut fixer son modèle et son niveau d'effort. Les commandes mécaniques (`/ship`, `/resolve`, `/retro`) tournent sur le modèle le moins coûteux ; les subagents sur un modèle intermédiaire (le relecteur change de modèle en risque élevé) ; `/land`, qui porte les barrières de fusion, reste sur le modèle par défaut.
+- **Modèle et effort par commande** : chaque commande et chaque subagent peut fixer son modèle et son niveau d'effort. Les commandes mécaniques (`/ship`, `/resolve`, `/retro`) tournent sur le modèle le moins coûteux ; les subagents sur un modèle intermédiaire (le relecteur change de modèle au niveau `full` (`review:full`)) ; `/land`, qui porte les barrières de fusion, reste sur le modèle par défaut.
 - **Sobriété en tokens** : ensemble des mesures qui réduisent le contexte relu (`TOKENS.md`) : extrait de tâche, sortie filtrée, pré-revue par script, niveaux de revue, modèle moins coûteux pour les commandes mécaniques.
 
 ## Les commandes
