@@ -29,7 +29,6 @@ Mesures qui limitent la consommation de la factory. Le choix d'un modèle moins 
 | 16b | **Opus réservé à trois cas** : rédaction de spec (`/new-spec`) et découpage (`planner`), parce qu'une erreur s'y propage à toute la suite ; relecteur au niveau `full` (`review:full`). Tout le reste tourne sur Sonnet ou Haiku | `.claude/commands/new-spec.md`, `.claude/agents/planner.md`, `/review` |
 | 17 | Plans de 3 à 5 tâches, préambule court, titres exacts pour le script | `planner.md`, `/plan` |
 | 18 | Mesure : `pnpm tokens`, colonnes dans `METRICS.md`, étape dans `/retro` | `scripts/token-report.mjs`, `METRICS.md`, `retro.md` |
-| 19 | Documents de référence hors du contexte chargé : `EXEMPLES-BACKEND.md`, `LEXIQUE.md`, `SPEC-CONTRAINTES-TECHNO.md` ne sont cités ni par `CLAUDE.md` ni par une commande d'implémentation ; seul `/init-project` renvoie, à la demande, vers `EXEMPLES-BACKEND.md`. Ne les référence pas depuis `CLAUDE.md` | `docs/factory/`, `init-project.md` |
 
 ## À vérifier sur chaque poste
 
