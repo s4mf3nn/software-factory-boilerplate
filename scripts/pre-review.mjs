@@ -222,7 +222,8 @@ function level() {
 
 const LEVEL_HELP = {
   full: "zone review:full : revue complète (tous les points de la procédure).",
-  standard: "risque élevé hors review:full ou moyen : revue complète ; Context7 seulement pour une API absente de docs/factory/libs-cache.md.",
+  standard:
+    "risque élevé hors review:full ou moyen : revue complète ; Context7 seulement pour une API absente de docs/factory/libs-cache.md.",
   light:
     "risque faible : spec, tests, cas limites, sécurité des routes et des entrées, honnêteté du résumé ; pas de Context7 sauf bibliothèque nouvelle.",
 };
