@@ -196,7 +196,9 @@ export function runChecks() {
       "correctif de bug (branche spec-xxxx-fix-*) : pas de tâche de plan, voir « Référence » de .pr-summary.md",
     );
     if (!hasRegressionTest(files))
-      problems.push("correctif sans test de non-régression : ajoute un test `*.test.ts` qui reproduit le bug");
+      problems.push(
+        "correctif sans test de non-régression : ajoute un test `*.test.ts` ou `*.test.tsx` qui reproduit le bug",
+      );
   }
 
   try {
