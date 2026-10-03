@@ -153,7 +153,7 @@ Cible réelle : navigateur, simulateur ou appareil, paquet installé, binaire.
 
 - `.github/workflows/release.yml`, déclenché à la main : lance `pnpm release` (échec explicite si le script manque) dans un environnement GitHub `production` (secrets et approbation côté GitHub), seulement si `gates` est vert sur `main`.
 - ADR-0001 (Implications) : la ligne « Déploiement » devient « Livraison : cible, commande, secrets, retour arrière ». `/init-project` : les fichiers de livraison entrent dans les zones de risque (lot 2).
-- `specs/SPEC-0000-bootstrap/spec.md` : critère « la commande de livraison existe et s'exécute à blanc ».
+- `specs/SPEC-0000-bootstrap/spec.md` : critère « la commande de livraison existe et s'exécute à blanc » (passé ensuite à SPEC-0001, CA1 : lot 12, section 9).
 - `METRICS.md` : « délai spec vers prod » se mesure sur ce workflow.
 
 ### Lot 7 : cadrage produit et ordre des specs

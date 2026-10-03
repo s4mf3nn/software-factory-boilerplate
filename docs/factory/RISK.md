@@ -9,6 +9,7 @@ La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre
 | Sensible | `**/migrations/`, `**/config/`, `docker-compose.yml` | Données et environnement | `full` (Opus) | Idem |
 | Sensible | `**/shared/monitoring/`, `**/sentry.*`, `**/.sentryclirc` | Suivi des erreurs : une fuite y envoie des données personnelles à un tiers | `full` (Opus) | Idem |
 | Élevé | `.github/`, `scripts/`, `CLAUDE.md`, `.claude/` | Modifient la factory elle-même | `standard` (Sonnet) | Revue humaine obligatoire, jamais d'auto-merge |
+| Cadrage | `specs/`, `docs/PRODUCT.md`, `docs/DOMAIN.md`, `docs/adr/` | Décident du quoi pour toutes les specs suivantes | PR de spec ou de cadrage (`spec-reviewer`) ; protégés par `CODEOWNERS` seulement, sans étiquette de risque | Revue humaine obligatoire, jamais d'auto-merge |
 | Contrat | `tests/acceptance/`, `tests/holdout/` | Définissent ce qui est juste | Label `contract` ; toute modification après fusion demande `contract-change` |
 | Moyen | `service.ts`, `repo.ts`, `**/db/schema/`, `**/shared/`, `package.json` de chaque paquet, point d'entrée de chaque application (posé par SPEC-0000) | Logique métier, code partagé entre features, dépendances | Revue humaine rapide : spec, tests, résumé |
 | Faible | Tout le reste, diff < 400 lignes | | Auto-merge possible en phase 3 (voir `WORKFLOW.md`) |

@@ -64,10 +64,13 @@ function isDelivered(spec) {
 }
 
 /** Renvoie `{ ok, message }` : les specs dont dépend `spec` sont-elles livrées sur `base` ? */
-export function checkDependencies(spec) {
+export function checkDependencies(spec, { requireSpec = false } = {}) {
   if (!SPEC_ID.test(spec ?? ""))
     return { ok: false, message: `Identifiant de spec invalide : "${spec ?? ""}" (SPEC-XXXX attendu)` };
   const paths = specFilesOnBase(spec, "spec.md");
+  // Avant /plan, la spec doit être fusionnée ; à l'implémentation, son plan l'est déjà et suffit.
+  if (paths.length !== 1 && requireSpec)
+    return { ok: false, message: `${spec} : pas de spec.md unique sur ${base}. Fusionne d'abord la PR de spec.` };
   if (paths.length !== 1)
     return { ok: true, message: `${spec} : pas de spec.md unique sur ${base}, aucune dépendance lue.` };
   const parsed = parseDependencies(git("show", `${base}:${paths[0]}`));
@@ -145,7 +148,7 @@ if (isMain) {
         process.exit(2);
       }
     }
-    const res = cmd === "check" ? checkPlan(spec, task) : checkDependencies(spec);
+    const res = cmd === "check" ? checkPlan(spec, task) : checkDependencies(spec, { requireSpec: true });
     (res.ok ? console.log : console.error)(res.message);
     process.exit(res.ok ? 0 : 1);
   } catch (e) {

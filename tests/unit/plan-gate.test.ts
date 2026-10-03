@@ -192,6 +192,9 @@ describe("scripts/plan-gate.mjs check", () => {
     const bad = deps("SPEC-0003");
     expect(bad.status).toBe(1);
     expect(bad.stderr).toContain("illisible");
+    const missing = deps("SPEC-0009");
+    expect(missing.status).toBe(1);
+    expect(missing.stderr).toContain("Fusionne d'abord la PR de spec");
   });
 
   it("s'exécute aussi depuis un chemin contenant des espaces (pas de faux OK silencieux)", () => {
