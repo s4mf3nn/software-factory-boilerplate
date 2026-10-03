@@ -6,5 +6,4 @@ import { describe, it } from "vitest";
 describe.skip("SPEC-0001 delivery", () => {
   it.todo("CA4 : an unhandled error reaches the error reporter with release and environment");
   it.todo("CA5 : the reported event carries no personal data");
-  it.todo("CA7 : a client below the minimum supported version gets CLIENT_OUTDATED and the request is not executed");
 });
