@@ -229,6 +229,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 | `gen-features.mjs` | Fichier généré qui remplace le registre central |
 | `token-report.mjs` | Mesure de la consommation de tokens |
 | `conductor-setup.sh`, `conductor-archive.sh` | Préparation et nettoyage d'un workspace |
+| `ci-data.sh` | Ressource de données d'un run de CI, par le `workspace-data.sh` du projet |
 
 ## Les outils
 

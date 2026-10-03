@@ -30,7 +30,7 @@ boilerplate (`docs/factory/BOILERPLATE.md`), section « Options ». -->
 - [ ] `tsconfig.json` et `tsconfig.test.json` par runtime (`jsx`, `lib`, `types`)
 - [ ] Environnement de test par runtime (`vitest.config.ts`), points d'entrée exclus de la couverture et de la mutation
 - [ ] Isolation des tests sur la ressource de données, `concurrency` de `stryker.config.json`
-- [ ] `scripts/workspace-data.sh` si la ressource de données n'est pas Postgres en Docker ; `db:migrate`
+- [ ] `scripts/workspace-data.sh` si la ressource de données n'est pas Postgres en Docker (appelé aussi par la CI, secret `WORKSPACE_DATA_TOKEN`) ; `db:migrate`
 - [ ] Interfaces et faux des services tiers et de l'horloge (CA5)
 - [ ] `docs/factory/UI.md`, composants de base et tokens de style (interface seulement)
 - [ ] Routage par fichiers : dossier déclaré dans `factory.routeDirs` de `package.json`, layouts qui lisent le registre généré (onglets, menu)
