@@ -62,7 +62,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 5. Applique les « Réglages GitHub » ci-dessous.
 6. Crée un `.env` à la racine du dépôt principal si le projet a des variables d'environnement (il est relié dans chaque workspace par le setup).
 7. Ajoute le dépôt dans Conductor : `.conductor/settings.toml` déclare déjà les scripts de setup, d'archivage et de lancement.
-8. Dans un premier workspace : `/plan SPEC-0000`, fusionne la PR de plan, puis `/implement SPEC-0000 T1` dans un nouveau workspace. SPEC-0000 s'exécute seule, avant toute autre spec. SPEC-0001 (livraison et cible réelle) la suit, en parallèle des premières specs métier.
+8. Dans un premier workspace : `/plan SPEC-0000`, fusionne la PR de plan, puis `/implement SPEC-0000 T1` dans un nouveau workspace, puis T2 après fusion de T1, etc. SPEC-0000 s'exécute seule, avant toute autre spec, une tâche à la fois (une par groupe : `plan-gate` le contrôle), chacune par un agent neuf. SPEC-0001 (livraison et cible réelle) la suit, en parallèle des premières specs métier.
 9. En parallèle de SPEC-0000, dans un autre workspace : `/roadmap <brief>` (cadrage produit, domaine et ordre des specs), fusionne la PR de cadrage, puis enchaîne les `/new-spec` dans l'ordre de `specs/ROADMAP.md`.
 
 ## À personnaliser

@@ -41,7 +41,7 @@ boilerplate (`docs/factory/BOILERPLATE.md`), section « Options ». -->
 Toute fonctionnalité métier. La livraison et les tests sur cible réelle : SPEC-0001.
 
 ## Contraintes
-Cette spec est exécutée **seule**, par un unique agent, avant toute autre.
+Cette spec est exécutée **seule**, avant toute autre, **une tâche à la fois** : son plan a une tâche par groupe, chacune implémentée par un agent neuf après fusion de la précédente (`node scripts/plan-gate.mjs lint` et `check` le contrôlent). Une seule tâche suffit pour une application simple ; avec plusieurs applications, par exemple : outillage commun et disposition du dépôt, puis une tâche par application, puis CI et zones de risque.
 
 Avec une interface : elle remplit `docs/factory/UI.md` et pose les composants de base et les tokens de style qu'il cite.
 

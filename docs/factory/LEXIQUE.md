@@ -70,7 +70,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Scénario caché** (holdout) : parcours de bout en bout écrit avec la spec dans `tests/holdout/SPEC-XXXX.test.ts`, validé par l'humain, que l'agent producteur ne voit jamais. Il vérifie que l'implémentation satisfait l'intention et pas seulement les tests visibles. Retiré du workspace par `scripts/holdout.mjs hide`, joué en CI quand le test de contrat de la spec n'a plus de `.skip`, immuable comme le contrat. Le détail d'un échec est réservé à l'humain.
 - **`contract-change`** : label posé par l'humain sur une PR pour autoriser une modification de test de contrat ou de scénario caché.
 - **PR de spec** : PR qui ne contient que la spec, son test de contrat et ses scénarios cachés. Relue par le `spec-reviewer`, puis relue et fusionnée par l'humain avant tout plan.
-- **SPEC-0000 (bootstrap)** : première spec d'un projet, qui pose le socle technique (applications, tests, faux des services). Exécutée seule, par un seul agent, avant toute autre.
+- **SPEC-0000 (bootstrap)** : première spec d'un projet, qui pose le socle technique (applications, tests, faux des services). Exécutée seule, avant toute autre, une tâche à la fois : son plan a une tâche par groupe, chacune par un agent neuf.
 - **SPEC-0001 (livraison)** : deuxième spec du socle : livraison, retour arrière et tests sur cible réelle. Elle suit SPEC-0000, en parallèle des premières specs métier.
 - **Cadrage** : documents qui précèdent les specs et qu'elles ne contredisent pas : `docs/PRODUCT.md` (problème, hypothèses, rôles, parcours, données personnelles, KPI et événements produit), `docs/DOMAIN.md` (vocabulaire, invariants, cycles de vie) et `specs/ROADMAP.md`. Rédigés par `/roadmap`, relus par le `spec-reviewer`, fusionnés par l'humain dans une **PR de cadrage**.
 - **Roadmap des specs** : `specs/ROADMAP.md`, suite ordonnée de tranches verticales, chacune une spec, avec ses dépendances.
@@ -95,7 +95,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **PR de tâche** : PR ouverte par `/ship` à la fin d'une tâche. Une spec donne donc une PR de spec, une PR de plan, puis une PR par tâche.
 - **Prompt de tâche** : la ligne `/implement SPEC-XXXX T#` que l'humain colle dans un nouveau workspace pour lancer une tâche. `/plan` les fournit, à utiliser après fusion de la PR de plan.
 - **Petit et jetable** : principe de dimensionnement. Une tâche tient dans le contexte d'un agent, un workspace ne sert qu'à une tâche, et une branche qui pose problème se jette et se régénère plutôt que de se réparer longuement.
-- **Contrôle du plan** : `scripts/plan-gate.mjs` vérifie qu'un plan `PRÊT` et la tâche demandée sont sur `origin/main` avant toute implémentation, et que les specs dont elle dépend sont livrées (`deps`, au début de `/plan`).
+- **Contrôle du plan** : `scripts/plan-gate.mjs` vérifie qu'un plan `PRÊT` et la tâche demandée sont sur `origin/main` avant toute implémentation, et que les specs dont elle dépend sont livrées (`deps`, au début de `/plan`). `lint` contrôle le plan local avant sa PR : celui de SPEC-0000 a une tâche par groupe.
 - **Redécoupage** : réponse prévue quand une tâche dépasse le contexte de l'agent ou que la revue ne converge pas. On refait le plan plutôt que de forcer.
 
 ## 5. Le parallélisme
