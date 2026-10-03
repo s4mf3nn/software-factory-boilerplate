@@ -74,11 +74,12 @@ jobs:
         env:
           BASE_REF: origin/${{ github.base_ref }}
         run: |
-          # :(glob) pour que `**` inclue aussi les fichiers directement sous src/ (src/app.ts).
+          # :(glob) pour que `**` inclue aussi les fichiers directement sous src/ (src/app.ts), et `**/src/` les
+          # paquets d'un dépôt à plusieurs applications (web/src/, apps/api/src/).
           # Un point d'entrée qu'aucun test ne charge (ici src/server.ts, à adapter à la stack) est exclu :
-          # ses mutants seraient NoCoverage.
-          FILES=$(git diff --name-only --diff-filter=AM "$BASE_REF"...HEAD -- ':(glob)src/**/*.ts' ':(glob)src/**/*.tsx' \
-            | grep -v -E '(\.(test|gen)\.tsx?|^src/server\.ts)$' | paste -sd, - || true)
+          # ses mutants seraient NoCoverage. Idem pour un fichier testé par un autre lanceur que Vitest.
+          FILES=$(git diff --name-only --diff-filter=AM "$BASE_REF"...HEAD -- ':(glob)**/src/**/*.ts' ':(glob)**/src/**/*.tsx' \
+            | grep -v -E '(\.(test|gen)\.tsx?|(^|/)src/server\.ts)$' | paste -sd, - || true)
           if [ -n "$FILES" ]; then pnpm exec stryker run --mutate "$FILES"; else echo "Rien à muter"; fi
 
   security:
