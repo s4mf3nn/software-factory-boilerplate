@@ -12,6 +12,7 @@
 7. **Merge** : `/land <PR>`, une PR à la fois. Il vérifie que le dernier run `gates` sur `main` est vert, puis les checks de la PR, demande ta confirmation pour `risk:high` ou `contract-change`, puis fait un squash-merge. Sans ruleset ni merge queue (plan GitHub Free), `/land` et le hook `pre-push` tiennent lieu de barrières ; les gates tournent aussi sur `main` après chaque fusion, pour voir deux PR vertes séparément qui la cassent ensemble. En cas de retard sur `main` ou de conflit : `/resolve` puis `/ship` dans le workspace de la tâche.
 8. **Archivage** du workspace : le bail est libéré (et la base dédiée supprimée, s'il y en a une) automatiquement.
 9. On passe au groupe suivant du plan.
+10. **Livraison**, quand tu le décides (après une spec, ou plusieurs) : workflow `release` lancé à la main sur `main`. Il refuse un commit dont `gates` n'est pas vert, attend ton approbation (environnement `production`) puis lance `pnpm release`. Aucun agent ne le déclenche.
 
 ## Correction d'un bug
 

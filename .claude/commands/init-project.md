@@ -41,4 +41,4 @@ Récapitule les réponses (technologies imposées avec leur rôle, déductions, 
 
 1. Lance `git status` et vérifie qu'il ne reste aucun `{{...}}` : `grep -rn "{{[A-Z_]*}}" CLAUDE.md README.md docs .github`.
 2. Ne commite ni ne pousse sans demander. Si l'utilisateur accepte, `git add -A && git commit -m "chore(factory): bootstrap software factory"`. Le push sur `main` est une action sortante : confirme-le explicitement, et fais-le **avant** `pnpm install` (voir `docs/factory/BOILERPLATE.md`, étape 4).
-3. Termine par la liste de ce qui reste à faire à la main : réglages GitHub (étiquettes, squash-merge, protection de `main`), `.env`, ajout du dépôt dans Conductor, puis `/new-spec` ou `/plan SPEC-0000`.
+3. Termine par la liste de ce qui reste à faire à la main : réglages GitHub (étiquettes, squash-merge, protection de `main`, environnement `production` si l'ADR prévoit une livraison), `.env`, ajout du dépôt dans Conductor, puis `/new-spec` ou `/plan SPEC-0000`.

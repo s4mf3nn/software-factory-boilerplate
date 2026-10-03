@@ -35,7 +35,7 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Commande `dev` : <à compléter>
 - Ressource de données par workspace : <mécanisme, ou « aucune »>
 - Secrets et variables d'environnement : <à compléter>
-- Déploiement : <à compléter>
+- Livraison : <cible (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml`, mode à blanc s'il existe, secrets de l'environnement GitHub `production`, retour arrière, fichiers de livraison à classer en zone de risque>
 
 ## Conséquences
 - Aucun fichier central n'est édité à la main pour ajouter une feature.
