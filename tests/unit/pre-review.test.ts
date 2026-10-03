@@ -168,7 +168,10 @@ describe("scripts/pre-review.mjs", () => {
     expect(level("src/features/auth/routes.ts")).toBe("full");
     expect(level("web/src/features/auth/login.tsx")).toBe("full");
     expect(level("apps/api/src/db/migrations/0001_init.sql")).toBe("full");
-    expect(level("src/shared/auth-middleware.ts")).toBe("standard");
+    expect(level("src/shared/auth-middleware.ts")).toBe("full");
+    expect(level("apps/api/src/shared/http/auth-guard.ts")).toBe("full");
+    expect(level("web/src/features/admin/reports.tsx")).toBe("full");
+    expect(level("src/shared/errors.ts")).toBe("standard");
     expect(level("mobile/package.json")).toBe("standard");
     expect(level("src/features/links/routes.ts")).toBe("light");
   });

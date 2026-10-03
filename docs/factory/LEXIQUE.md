@@ -48,6 +48,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 
 - **Spec** : document `specs/SPEC-XXXX-<slug>/spec.md` qui dit ce qui doit être vrai une fois le travail livré. C'est la seule source de vérité fonctionnelle : on ne code jamais sans spec.
 - **Statut d'une spec** : `BROUILLON`, `VALIDÉE`, `EN COURS`, `LIVRÉE`.
+- **Acteurs et rôles** : section de la spec qui donne, pour chaque action exposée, le rôle requis et ce que voit chacun. Chaque refus est un critère testé.
 - **Critère d'acceptation (CA#)** : comportement observable et testable, numéroté (`CA1`, `CA2`…). Les tâches, les tests et les PR y font référence par leur identifiant.
 - **CU#** : variante utilisée pour le comportement d'une interface, non observable par le test de contrat et vérifié par des tests écrits dans les tâches.
 - **Cas limites** : section de la spec qui liste les entrées et situations anormales à traiter (vide, doublon, concurrence, dépendance indisponible).
@@ -134,7 +135,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Revue locale** : la revue a lieu dans le workspace, avant le push. Il n'y a pas de revue par agent en CI, donc pas de clé d'API en CI.
 - **Pré-revue** : contrôles par script, sans modèle, faits avant la revue : périmètre, contrat, dépendances déclarées, section Context7 remplie (`scripts/pre-review.mjs check`). Une violation se corrige avant de lancer le relecteur et ne compte pas comme un passage.
 - **Brief** : ce que reçoit le relecteur : niveau de revue, résultat de la pré-revue, fichiers modifiés et diff filtré (sans lockfile, fichiers générés ni tests de contrat).
-- **Niveau de revue** : ampleur de la relecture, déduite des chemins touchés : `full` (zone `review:full` : auth, migrations, config, relecteur sur Opus), `standard` (risque élevé ou moyen), `light` (risque faible).
+- **Niveau de revue** : ampleur de la relecture, déduite des chemins touchés : `full` (zone `review:full` : auth, administration, migrations, config, relecteur sur Opus), `standard` (risque élevé ou moyen), `light` (risque faible).
 - **Modèle du relecteur** : au niveau `full`, le relecteur tourne sur un autre modèle que celui du producteur, parce qu'un modèle qui relit son propre code répète ses erreurs au lieu de les voir. Le modèle utilisé est tracé dans le bloc « Revue locale » ; `review-gate.mjs record` refuse un verdict `full` sans `--model`, mais ne vérifie pas que le modèle diffère de celui du producteur. Les deux modèles restent de la même famille : la décorrélation est partielle.
 - **Verdict** : première ligne de la réponse du relecteur. `BLOQUANT` s'il y a au moins un point bloquant, sinon `CHANGEMENTS` s'il y a au moins un point à corriger, sinon `OK`.
 - **Bloquants / À corriger / Points d'incertitude** : les trois rubriques du relecteur. Les deux premières doivent être traitées par l'agent ; la troisième est destinée à l'humain et n'empêche pas un `OK`.
@@ -148,8 +149,8 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 
 ## 8. Le risque et la fusion
 
-- **Zone de risque** : ensemble de chemins classés selon ce qu'une erreur y coûterait (`RISK.md`). Élevé : sécurité du domaine, authentification, migrations, configuration, et la factory elle-même. Moyen : logique métier, schéma, dépendances. Faible : le reste.
-- **Labels de risque** : `risk:high`, `risk:medium`, `risk:low`, posés par la CI d'après `.github/labeler.yml`. Le niveau de revue vient de là, mais découplé : `review:full` (Opus) pour les zones sensibles seulement (auth, migrations, config), `standard` (Sonnet) pour `risk:high` (outillage) et `risk:medium`, `light` (Sonnet) sinon.
+- **Zone de risque** : ensemble de chemins classés selon ce qu'une erreur y coûterait (`RISK.md`). Élevé : sécurité du domaine, authentification et contrôle d'accès, administration, migrations, configuration, et la factory elle-même. Moyen : logique métier, schéma, dépendances. Faible : le reste.
+- **Labels de risque** : `risk:high`, `risk:medium`, `risk:low`, posés par la CI d'après `.github/labeler.yml`. Le niveau de revue vient de là, mais découplé : `review:full` (Opus) pour les zones sensibles seulement (auth, administration, migrations, config), `standard` (Sonnet) pour `risk:high` (outillage) et `risk:medium`, `light` (Sonnet) sinon.
 - **Label `contract`** : posé automatiquement quand une PR touche `tests/acceptance/` ou `tests/holdout/`.
 - **Code owners** : `.github/CODEOWNERS` désigne l'humain propriétaire des chemins à risque élevé.
 - **Livraison** : mise à disposition des utilisateurs (déploiement, publication sur un store ou un registre de paquets). Workflow `release` lancé à la main par l'humain, depuis un commit de `main` dont `gates` est vert, avec l'approbation et les secrets de l'environnement `production` ; la commande `pnpm release` est posée par SPEC-0000.

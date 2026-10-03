@@ -1,11 +1,11 @@
 # Zones de risque et routage
 
-La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre-review.mjs`) ; ce document explique le pourquoi. Le niveau de revue `full` (relecteur sur Opus) ne suit pas `risk:high` : il vient de l'étiquette `review:full` (auth, migrations, config, `docker-compose.yml`), pour garder Opus rare. L'outillage de la factory reste en risque élevé (revue humaine) mais se relit en `standard`. Toute modification de l'un doit être répercutée dans l'autre, et dans `.github/CODEOWNERS` pour le niveau élevé.
+La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre-review.mjs`) ; ce document explique le pourquoi. Le niveau de revue `full` (relecteur sur Opus) ne suit pas `risk:high` : il vient de l'étiquette `review:full` (auth, administration, migrations, config, `docker-compose.yml`), pour garder Opus rare. L'outillage de la factory reste en risque élevé (revue humaine) mais se relit en `standard`. Toute modification de l'un doit être répercutée dans l'autre, et dans `.github/CODEOWNERS` pour le niveau élevé.
 
 | Niveau | Chemins | Pourquoi | Revue | Traitement |
 |---|---|---|---|---|
 | Sensible | <zones sensibles du domaine, voir `DOMAIN-SECURITY.md`> | <à compléter> | `full` (Opus) | Revue humaine approfondie, jamais d'auto-merge |
-| Sensible | `**/features/auth/` | Accès et abus | `full` (Opus) | Idem |
+| Sensible | `**/features/auth/`, `**/shared/**/auth*`, `**/features/admin/` | Accès, rôles et abus ; une surface d'administration agit sur les données de tous | `full` (Opus) | Idem |
 | Sensible | `**/migrations/`, `**/config/`, `docker-compose.yml` | Données et environnement | `full` (Opus) | Idem |
 | Élevé | `.github/`, `scripts/`, `CLAUDE.md`, `.claude/` | Modifient la factory elle-même | `standard` (Sonnet) | Revue humaine obligatoire, jamais d'auto-merge |
 | Contrat | `tests/acceptance/`, `tests/holdout/` | Définissent ce qui est juste | Label `contract` ; toute modification après fusion demande `contract-change` |

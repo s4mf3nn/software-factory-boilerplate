@@ -89,7 +89,7 @@ Les étiquettes doivent exister avant la première PR (`gh pr edit --add-label` 
 gh label create "risk:high" --color d73a4a --description "Zone à risque élevé : revue humaine obligatoire"
 gh label create "risk:medium" --color fbca04 --description "Risque moyen : revue humaine allégée"
 gh label create "risk:low" --color 0e8a16 --description "Risque faible"
-gh label create "review:full" --color 8f1a8f --description "Relecteur sur Opus : auth, migrations, config, docker-compose.yml"
+gh label create "review:full" --color 8f1a8f --description "Relecteur sur Opus : auth, administration, migrations, config, docker-compose.yml"
 gh label create "contract" --color 5319e7 --description "Tests d'acceptation / spec contrat"
 gh label create "contract-change" --color b60205 --description "Modification d'un test de contrat : validation humaine requise"
 ```

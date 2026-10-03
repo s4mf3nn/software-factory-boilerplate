@@ -9,6 +9,9 @@
           # Valeurs par défaut (authentification, migrations, configuration) : à adapter au type d'application.
           - "**/migrations/**"
           - "**/features/auth/**"
+          # Contrôle d'accès partagé (middleware, garde de rôle) et surfaces d'administration.
+          - "**/shared/**/auth*"
+          - "**/features/admin/**"
           - "**/config/**"
           # La factory elle-même
           - ".github/**"
@@ -25,6 +28,8 @@
           # Zones sensibles du domaine : à compléter (voir docs/factory/DOMAIN-SECURITY.md)
           - "**/migrations/**"
           - "**/features/auth/**"
+          - "**/shared/**/auth*"
+          - "**/features/admin/**"
           - "**/config/**"
           - "docker-compose.yml"
 

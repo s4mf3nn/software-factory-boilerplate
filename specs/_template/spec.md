@@ -9,6 +9,9 @@ Scénarios cachés : `tests/holdout/SPEC-XXXX.test.ts` (ne pas les décrire ici)
 ## Objectif
 Ce qui doit être vrai une fois la spec livrée, en deux ou trois phrases, du point de vue de l'utilisateur.
 
+## Acteurs et rôles
+Qui agit dans cette spec, et pour chaque action exposée (route, écran, commande) le rôle requis et ce que voit chacun (ex. « un utilisateur ne lit que ses propres conversations ; un modérateur lit les signalements »). Chaque refus a son critère d'acceptation. `Aucun rôle` pour une spec sans action exposée.
+
 ## Critères d'acceptation
 - **CA1** : comportement observable et testable
 - **CA2** : ...
