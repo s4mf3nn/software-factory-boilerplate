@@ -21,6 +21,7 @@ Qui agit dans cette spec, et pour chaque action exposée (route, écran, command
 - Doublons, concurrence
 - Dépendance indisponible (base, cache, réseau, service tiers : simulée par son faux)
 - Temps : expiration, échéance, changement de jour ou de fuseau (horloge factice)
+- Temps réel : signal perdu ou connexion coupée (l'état se retrouve par l'API)
 - Message d'une file reçu deux fois, ou consommateur en échec (consommateur idempotent, erreur remontée)
 
 ## Contrat d'interface

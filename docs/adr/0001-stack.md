@@ -36,6 +36,7 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Commande `dev` : <à compléter ; avec plusieurs serveurs (API, bundler), un port par serveur : `$PORT`, puis `$PORT+1`, `$PORT+2`... dans l'ordre écrit ici, et l'adresse que chaque application utilise pour joindre les autres>
 - Services tiers : <un par ligne : rôle (email, stockage d'objets, notifications, traceur d'événements, suivi des erreurs...), implémentation réelle, interface et faux dans `src/shared/<service>/`, ou « aucun ». Voir le guide, « Services tiers, horloge et faux »>
 - Tâches planifiées : <planificateur du runtime et branchement par le point d'entrée, ou « aucune »>
+- Temps réel : <« aucun » (le client interroge l'API à intervalle), ou le canal du runtime (WebSocket, événements envoyés par le serveur) et ce qu'il transporte ; l'état reste lu par l'API>
 - Files de messages : <file du runtime et branchement des consommateurs par le point d'entrée, garantie de livraison (au moins une fois, sauf mention contraire), nombre de tentatives et sort d'un message toujours en échec ; ou « aucune »>
 - Ressource de données par workspace : <mécanisme, ou « aucune » ; hors Docker, le même `scripts/workspace-data.sh` sert aux runs de CI, avec le secret `WORKSPACE_DATA_TOKEN` aux droits limités aux ressources de test>
 - Transactions (si persistance) : <pilote et mode de connexion qui les permettent depuis le runtime (ex. un pilote HTTP sans transaction interactive ne convient pas à une écriture en plusieurs requêtes), niveau d'isolation par défaut>
