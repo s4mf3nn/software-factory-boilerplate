@@ -2,7 +2,7 @@
 
 Statut : BROUILLON | VALIDÉE | EN COURS | LIVRÉE
 Risque estimé : faible | moyen | élevé
-Tests de contrat : `tests/acceptance/SPEC-XXXX.test.ts`
+Tests de contrat : `tests/acceptance/SPEC-XXXX.test.ts` (ou fichiers suffixés `SPEC-XXXX.<suffixe>.test.ts(x)`)
 Scénarios cachés : `tests/holdout/SPEC-XXXX.test.ts` (ne pas les décrire ici)
 
 ## Objectif

@@ -123,7 +123,7 @@ volumes:
 - `tsconfig.json` : l'option `jsx`, et la `lib` ou le preset du framework. `types: ["node"]` et l'absence de `DOM` sont les valeurs par défaut du socle, pas une règle.
 - `vitest.config.ts` : l'environnement de test (ex. `jsdom`) et ce qui sort de la couverture (point d'entrée, écrans sans logique si l'ADR le décide). Les fichiers `.tsx` sont déjà pris en compte par les tests, la couverture et la mutation.
 - `package.json` : le script `dev` (bundler, simulateur) ; `.gitignore` : les dossiers générés par le framework (Biome suit `.gitignore`).
-- Tests de contrat et scénarios cachés : ils passent par l'interface rendue, en `SPEC-XXXX.test.tsx`.
+- Tests de contrat et scénarios cachés : ils passent par l'interface rendue, en `SPEC-XXXX.test.tsx`. Une spec qui couvre une API et un écran répartit son contrat en fichiers suffixés (`SPEC-XXXX.api.test.ts`, `SPEC-XXXX.ui.test.tsx`).
 - Tests d'interface hors de portée de Vitest (ex. rendu React Native) : le lanceur ajouté est une nouvelle dépendance à justifier, et `pnpm verify` doit l'enchaîner.
 - Tailwind est imposé par la factory pour toute interface (NativeWind pour React Native) ; il est consigné dans l'ADR-0001, et SPEC-0000 le pose.
 - `docs/factory/RISK.md`, `.github/labeler.yml`, `docs/factory/DOMAIN-SECURITY.md` : les zones et règles par défaut visent une API.

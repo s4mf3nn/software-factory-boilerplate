@@ -2,6 +2,8 @@
 // Scénarios cachés (`tests/holdout/SPEC-XXXX.test.ts`, ou `.test.tsx` quand ils rendent une interface) : écrits avec
 // la spec, validés par l'humain, jamais vus par l'agent producteur. Ils vérifient que l'implémentation satisfait
 // l'intention, pas seulement les tests visibles.
+// Une spec peut répartir son contrat et ses scénarios sur plusieurs fichiers suffixés (`SPEC-XXXX.api.test.ts`,
+// `SPEC-XXXX.ui.test.tsx`), par exemple quand ils s'exécutent dans des environnements différents.
 // Usage :
 //   node scripts/holdout.mjs hide            retire tests/holdout de ce workspace (sparse-checkout), au début de /implement et de /fix
 //   node scripts/holdout.mjs list            scénarios actifs : ceux dont le test de contrat n'a plus de `.skip`
@@ -16,24 +18,56 @@ import { pathToFileURL } from "node:url";
 
 export const HOLDOUT_DIR = "tests/holdout";
 const ACCEPTANCE_DIR = "tests/acceptance";
-const FILE = /^(SPEC-\d{4})\.test\.tsx?$/;
-const TEST_EXTENSIONS = [".test.ts", ".test.tsx"];
+// `SPEC-0003.test.ts` ou `SPEC-0003.<suffixe>.test.ts(x)`, suffixe en minuscules (ex. `api`, `ui`, `native`).
+const FILE = /^(SPEC-\d{4})(?:\.([a-z][a-z0-9-]*))?\.test\.tsx?$/;
+const TEST_FILE = /\.test\.tsx?$/;
 
-/** Identifiant de spec d'un fichier de scénarios (`SPEC-0003.test.ts`), ou null. */
+/** Identifiant de spec d'un fichier de contrat ou de scénarios (`SPEC-0003.test.ts`), ou null. */
 export function specOf(file) {
   return FILE.exec(path.basename(file))?.[1] ?? null;
 }
 
-/** Texte du test de contrat d'une spec, quelle que soit son extension, ou null s'il n'existe pas. */
-function readAcceptance(dir, spec) {
-  const candidates = TEST_EXTENSIONS.map((extension) => path.join(dir, ACCEPTANCE_DIR, `${spec}${extension}`));
-  const file = candidates.find((candidate) => fs.existsSync(candidate));
-  return file === undefined ? null : fs.readFileSync(file, "utf8");
+/** Suffixe d'un fichier de contrat ou de scénarios (`api` pour `SPEC-0003.api.test.ts`), ou null. */
+export function suffixOf(file) {
+  return FILE.exec(path.basename(file))?.[2] ?? null;
 }
 
-/** Les scénarios d'une spec sont joués quand son test de contrat existe et n'a plus aucun `.skip`. */
-export function isActive(acceptanceText) {
-  return acceptanceText !== null && !/\.skip\s*\(/.test(acceptanceText);
+/** Fichiers de test de `folder` (relatif à `dir`), triés ; liste vide si le dossier n'existe pas. */
+function testFiles(dir, folder) {
+  if (!fs.existsSync(path.join(dir, folder))) return [];
+  return fs
+    .readdirSync(path.join(dir, folder))
+    .filter((f) => TEST_FILE.test(f))
+    .sort();
+}
+
+/** Textes de tous les fichiers de contrat d'une spec, quels que soient leur suffixe et leur extension. */
+function readAcceptance(dir, spec) {
+  return testFiles(dir, ACCEPTANCE_DIR)
+    .filter((f) => specOf(f) === spec)
+    .map((f) => fs.readFileSync(path.join(dir, ACCEPTANCE_DIR, f), "utf8"));
+}
+
+/** Les scénarios d'une spec sont joués quand elle a un contrat et qu'aucun de ses fichiers n'a encore de `.skip`. */
+export function isActive(acceptanceTexts) {
+  return acceptanceTexts.length > 0 && acceptanceTexts.every((text) => !/\.skip\s*\(/.test(text));
+}
+
+/** Fichiers de test du contrat ou des scénarios dont le nom n'est pas reconnu : ils ne seraient jamais joués. */
+export function unrecognizedFiles(dir = process.cwd()) {
+  return [ACCEPTANCE_DIR, HOLDOUT_DIR].flatMap((folder) =>
+    testFiles(dir, folder)
+      .filter((f) => specOf(f) === null)
+      .map((f) => path.join(folder, f)),
+  );
+}
+
+/** Signale les noms non reconnus ; renvoie true s'il y en a. */
+function reportUnrecognized() {
+  const bad = unrecognizedFiles();
+  for (const f of bad)
+    console.error(`Nom non reconnu : ${f} (attendu SPEC-XXXX.test.ts ou SPEC-XXXX.<suffixe>.test.ts, en .ts ou .tsx)`);
+  return bad.length > 0;
 }
 
 /** Décompte par spec d'un rapport JSON de Vitest : `{ spec, passed, total, failures, error }`. */
@@ -56,12 +90,8 @@ export function summarize(report) {
 
 /** Fichiers de scénarios présents dans `dir`, avec leur état d'activation. */
 export function holdouts(dir = process.cwd()) {
-  const at = (p) => path.join(dir, p);
-  if (!fs.existsSync(at(HOLDOUT_DIR))) return [];
-  return fs
-    .readdirSync(at(HOLDOUT_DIR))
-    .filter((f) => FILE.test(f))
-    .sort()
+  return testFiles(dir, HOLDOUT_DIR)
+    .filter((f) => specOf(f) !== null)
     .map((f) => ({
       spec: specOf(f),
       file: path.join(HOLDOUT_DIR, f),
@@ -76,6 +106,7 @@ function hide() {
 }
 
 function list() {
+  if (reportUnrecognized()) return 2;
   const all = holdouts();
   if (!all.length) console.log("Aucun scénario caché dans ce workspace");
   for (const h of all) console.log(`${h.spec}  ${h.active ? "actif" : "inactif (test de contrat encore en .skip)"}`);
@@ -83,6 +114,7 @@ function list() {
 }
 
 function run(details) {
+  if (reportUnrecognized()) return 2;
   const active = holdouts().filter((h) => h.active);
   if (!active.length) {
     console.log("Scénarios cachés : aucun à jouer");
