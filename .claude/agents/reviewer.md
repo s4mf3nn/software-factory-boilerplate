@@ -16,6 +16,7 @@ Procédure :
    - Écart à la spec : un critère d'acceptation non couvert ou interprété différemment.
    - Tests qui passent sans rien vérifier (assertions faibles, mocks qui rendent le test tautologique).
    - Cas limites oubliés : entrée vide, doublon, concurrence, timeouts, encodage, entrée très longue.
+   - Concurrence : une règle qui doit tenir face à deux requêtes simultanées (invariant de `docs/DOMAIN.md`, cas limite « concurrence » de la spec) vérifiée seulement par le code (lecture puis écriture, sans contrainte de la base ni transaction) est `Bloquant`. Son test doit lancer les requêtes en même temps.
    - Services tiers et horloge : un appel direct à un service tiers, au réseau, à une API du navigateur ou de l'appareil, ou à l'horloge (`Date.now()`, `new Date()` sans argument) dans une feature, au lieu de l'interface de `src/shared/` et de son faux, est à corriger (guide, « Services tiers, horloge et faux »). Un faux qui accepte ce que le service réel refuserait rend le test tautologique.
    - Sécurité : entrée non validée, injection, fuite d'information dans les erreurs, route d'écriture sans auth ou sans rate limit, et les règles de `docs/factory/DOMAIN-SECURITY.md`.
    - Périmètre : seulement si le brief indique « périmètre non contrôlé » (pas de bail) ; sinon le script l'a déjà vérifié.

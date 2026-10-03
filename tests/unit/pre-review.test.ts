@@ -11,6 +11,7 @@ interface PreReview {
   labelGlobs(text: string, label: string): string[];
   labelNames(text: string): string[];
   deadZones(text: string, files: string[]): { label: string; glob: string }[];
+  unprotectedSqlFiles(text: string, files: string[]): string[];
   reviewLevel(files: string[], labeler: string): string;
   reviewKind(files: string[]): string;
   inPerimeter(file: string, paths: string[]): boolean;
@@ -153,6 +154,12 @@ describe("scripts/pre-review.mjs", () => {
       { label: "risk:medium", glob: "web/**" },
     ]);
     expect(mod.deadZones(labeler, [])).toHaveLength(7);
+  });
+
+  it("lists SQL files that no risk:high glob covers", () => {
+    const files = ["src/features/redirect/seed.sql", "drizzle/0001_init.sql", "web/schema.sql", "README.md"];
+    expect(mod.unprotectedSqlFiles(labeler, files)).toEqual(["drizzle/0001_init.sql", "web/schema.sql"]);
+    expect(mod.unprotectedSqlFiles(labeler, ["README.md"])).toEqual([]);
   });
 
   it("classifies the default zones the same way whatever the package layout", () => {

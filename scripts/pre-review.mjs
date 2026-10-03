@@ -6,7 +6,8 @@
 //   node scripts/pre-review.mjs mode    travail de spec ou hors spec (bail du workspace, branche spec-xxxx-t#-* ou spec-xxxx-fix-*)
 //   node scripts/pre-review.mjs brief   niveau, contrôles, fichiers et diff filtré, pour le subagent `reviewer`
 //   node scripts/pre-review.mjs kind    relecteur à lancer : spec (`spec-reviewer` : specs, cadrage, contrat) | code (`reviewer`)
-//   node scripts/pre-review.mjs zones   globs de .github/labeler.yml qui ne correspondent à aucun fichier suivi (avertissement)
+//   node scripts/pre-review.mjs zones   globs de .github/labeler.yml qui ne correspondent à aucun fichier suivi, et fichiers
+//                                       SQL hors de toute zone `risk:high` (avertissements)
 // Contrôles : fichiers modifiés dans le périmètre du bail, scénarios cachés retirés du workspace de tâche, tests de
 // contrat (check-contract), dépendances ajoutées et déclarées dans .pr-summary.md, section « Documentation consultée
 // (Context7) » remplie, test de non-régression présent sur une branche de correctif (spec-xxxx-fix-*).
@@ -78,6 +79,15 @@ export function deadZones(labelerText, files) {
       .filter((glob) => !files.some((f) => globMatch(glob, f)))
       .map((glob) => ({ label, glob })),
   );
+}
+
+/**
+ * Fichiers `.sql` suivis qu'aucun glob `risk:high` ne couvre. Un schéma ou une migration hors zone passe sans revue
+ * humaine : c'est le cas quand l'outil de migration écrit ailleurs que dans un dossier `migrations/`.
+ */
+export function unprotectedSqlFiles(labelerText, files) {
+  const globs = labelGlobs(labelerText, "risk:high");
+  return files.filter((f) => f.endsWith(".sql") && !globs.some((g) => globMatch(g, f)));
 }
 
 /** `full` si un fichier est en zone `review:full`, `standard` s'il est en risque élevé ou moyen, sinon `light`. */
@@ -274,7 +284,13 @@ function brief() {
 /** Avertit des zones mortes, sans échouer : avant SPEC-0000, la plupart des zones applicatives le sont. */
 function zones() {
   const files = git("ls-files").split("\n").filter(Boolean);
-  const dead = deadZones(fs.readFileSync(".github/labeler.yml", "utf8"), files);
+  const labeler = fs.readFileSync(".github/labeler.yml", "utf8");
+  const sql = unprotectedSqlFiles(labeler, files);
+  if (sql.length) {
+    console.log(`Fichiers SQL hors de toute zone risk:high (${sql.length}) : ajoute leur dossier aux zones sensibles.`);
+    for (const f of sql) console.log(`  ${f}`);
+  }
+  const dead = deadZones(labeler, files);
   if (!dead.length) {
     console.log("Zones de risque : chaque glob de .github/labeler.yml correspond à au moins un fichier.");
     return;

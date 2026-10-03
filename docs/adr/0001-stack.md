@@ -36,6 +36,8 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Services tiers : <un par ligne : rôle (email, stockage d'objets, notifications, traceur d'événements, suivi des erreurs...), implémentation réelle, interface et faux dans `src/shared/<service>/`, ou « aucun ». Voir le guide, « Services tiers, horloge et faux »>
 - Tâches planifiées : <planificateur du runtime et branchement par le point d'entrée, ou « aucune »>
 - Ressource de données par workspace : <mécanisme, ou « aucune »>
+- Transactions (si persistance) : <pilote et mode de connexion qui les permettent depuis le runtime (ex. un pilote HTTP sans transaction interactive ne convient pas à une écriture en plusieurs requêtes), niveau d'isolation par défaut>
+- Contraintes portées par la base (si persistance) : <ce que la base garantit seule (unicité, clés étrangères, vérifications) ; dossier des migrations, à classer en zone sensible>
 - Secrets et variables d'environnement : <à compléter>
 - Livraison : <cible (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml`, mode à blanc s'il existe, secrets de l'environnement GitHub `production`, retour arrière, fichiers de livraison à classer en zone de risque>
 
