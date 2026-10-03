@@ -60,6 +60,9 @@ jobs:
         run: pnpm lint
       - name: Tests et couverture
         run: pnpm test:coverage
+      - name: Contrat confié à un autre lanceur que Vitest
+        # Sans effet tant que package.json ne déclare pas `factory.contractRunners` (voir scripts/contract-files.mjs).
+        run: pnpm test:contract
       - name: Contrat des tests d'acceptation
         if: github.event_name == 'pull_request'
         env:

@@ -3,43 +3,32 @@
 // la spec, validés par l'humain, jamais vus par l'agent producteur. Ils vérifient que l'implémentation satisfait
 // l'intention, pas seulement les tests visibles.
 // Une spec peut répartir son contrat et ses scénarios sur plusieurs fichiers suffixés (`SPEC-XXXX.api.test.ts`,
-// `SPEC-XXXX.ui.test.tsx`), par exemple quand ils s'exécutent dans des environnements différents.
+// `SPEC-XXXX.ui.test.tsx`), par exemple quand ils s'exécutent dans des environnements différents. Un suffixe déclaré
+// dans package.json (`factory.contractRunners`, voir scripts/contract-files.mjs) est joué par son propre lanceur.
 // Usage :
 //   node scripts/holdout.mjs hide            retire tests/holdout de ce workspace (sparse-checkout), au début de /implement et de /fix
 //   node scripts/holdout.mjs list            scénarios actifs : ceux dont le test de contrat n'a plus de `.skip`
 //   node scripts/holdout.mjs run [--details] joue les scénarios actifs (code 1 si l'un échoue)
 // Sans `--details`, la sortie se limite à un décompte par spec : le détail d'un échec est réservé à l'humain,
-// sinon l'agent qui lit la CI apprendrait le scénario. Rapport complet dans .context/holdout.json (hors git).
+// sinon l'agent qui lit la CI apprendrait le scénario. Rapports complets dans .context/holdout-<lanceur>.json (hors git).
 // Retour arrière de `hide` (humain) : git sparse-checkout disable.
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-export const HOLDOUT_DIR = "tests/holdout";
-const ACCEPTANCE_DIR = "tests/acceptance";
-// `SPEC-0003.test.ts` ou `SPEC-0003.<suffixe>.test.ts(x)`, suffixe en minuscules (ex. `api`, `ui`, `native`).
-const FILE = /^(SPEC-\d{4})(?:\.([a-z][a-z0-9-]*))?\.test\.tsx?$/;
-const TEST_FILE = /\.test\.tsx?$/;
+import {
+  ACCEPTANCE_DIR,
+  groupByRunner,
+  HOLDOUT_DIR,
+  readPackage,
+  readRunners,
+  runScript,
+  specOf,
+  testFiles,
+} from "./contract-files.mjs";
 
-/** Identifiant de spec d'un fichier de contrat ou de scénarios (`SPEC-0003.test.ts`), ou null. */
-export function specOf(file) {
-  return FILE.exec(path.basename(file))?.[1] ?? null;
-}
-
-/** Suffixe d'un fichier de contrat ou de scénarios (`api` pour `SPEC-0003.api.test.ts`), ou null. */
-export function suffixOf(file) {
-  return FILE.exec(path.basename(file))?.[2] ?? null;
-}
-
-/** Fichiers de test de `folder` (relatif à `dir`), triés ; liste vide si le dossier n'existe pas. */
-function testFiles(dir, folder) {
-  if (!fs.existsSync(path.join(dir, folder))) return [];
-  return fs
-    .readdirSync(path.join(dir, folder))
-    .filter((f) => TEST_FILE.test(f))
-    .sort();
-}
+export { HOLDOUT_DIR, specOf, suffixOf } from "./contract-files.mjs";
 
 /** Textes de tous les fichiers de contrat d'une spec, quels que soient leur suffixe et leur extension. */
 function readAcceptance(dir, spec) {
@@ -70,7 +59,7 @@ function reportUnrecognized() {
   return bad.length > 0;
 }
 
-/** Décompte par spec d'un rapport JSON de Vitest : `{ spec, passed, total, failures, error }`. */
+/** Décompte par spec d'un rapport JSON de Vitest (ou de Jest, même format) : `{ spec, passed, total, failures, error }`. */
 export function summarize(report) {
   return (report.testResults ?? [])
     .map((r) => {
@@ -113,6 +102,30 @@ function list() {
   return 0;
 }
 
+/**
+ * Joue `files` sous Vitest (`script` null) ou avec le script déclaré, sortie capturée (jamais montrée sans --details).
+ * Renvoie `{ report, code, output }` ; `report` est null si le lanceur n'a écrit aucun rapport.
+ */
+function play(script, files) {
+  const out = path.join(".context", `holdout-${(script ?? "vitest").replace(/[^a-zA-Z0-9-]/g, "-")}.json`);
+  fs.mkdirSync(path.dirname(out), { recursive: true });
+  fs.rmSync(out, { force: true });
+  const env = { ...process.env, HOLDOUT: "1" };
+  const res =
+    script === null
+      ? spawnSync("pnpm", ["exec", "vitest", "run", ...files, "--reporter=json", `--outputFile=${out}`], {
+          encoding: "utf8",
+          env,
+          maxBuffer: 256 * 1024 * 1024,
+        })
+      : runScript(script, files, out, { env, capture: true });
+  return {
+    report: fs.existsSync(out) ? JSON.parse(fs.readFileSync(out, "utf8")) : null,
+    code: res.status ?? res.error?.message,
+    output: `${res.stdout ?? ""}${res.stderr ?? ""}`,
+  };
+}
+
 function run(details) {
   if (reportUnrecognized()) return 2;
   const active = holdouts().filter((h) => h.active);
@@ -120,20 +133,22 @@ function run(details) {
     console.log("Scénarios cachés : aucun à jouer");
     return 0;
   }
-  const out = path.join(".context", "holdout.json");
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.rmSync(out, { force: true });
-  const res = spawnSync(
-    "pnpm",
-    ["exec", "vitest", "run", ...active.map((h) => h.file), "--reporter=json", `--outputFile=${out}`],
-    { encoding: "utf8", env: { ...process.env, HOLDOUT: "1" }, maxBuffer: 256 * 1024 * 1024 },
+  const groups = groupByRunner(
+    active.map((h) => h.file),
+    readRunners(readPackage()),
   );
-  if (!fs.existsSync(out)) {
-    console.error(`Scénarios cachés : Vitest n'a produit aucun rapport (code ${res.status ?? res.error?.message}).`);
-    if (details) console.error(`${res.stdout ?? ""}${res.stderr ?? ""}`);
-    return 2;
+  const rows = [];
+  for (const [script, files] of groups) {
+    const played = play(script, files);
+    if (played.report === null) {
+      const runner = script ?? "Vitest";
+      console.error(`Scénarios cachés : ${runner} n'a produit aucun rapport (code ${played.code}).`);
+      if (details) console.error(played.output);
+      return 2;
+    }
+    rows.push(...summarize(played.report));
   }
-  const rows = summarize(JSON.parse(fs.readFileSync(out, "utf8")));
+  rows.sort((a, b) => a.spec.localeCompare(b.spec));
   let failed = false;
   for (const r of rows) {
     const ok = !r.error && r.passed === r.total;

@@ -23,7 +23,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 | Mécanisme | Ce qu'il garantit | Fichiers |
 |---|---|---|
 | Spec contrat | Pas de code sans spec ; critères numérotés `CA#` | `specs/_template/spec.md`, `/new-spec` |
-| Tests de contrat immuables | Un agent ne peut que retirer `.skip` ; le reste demande le label `contract-change` | `tests/acceptance/`, `scripts/check-contract.mjs` |
+| Tests de contrat immuables | Un agent ne peut que retirer `.skip` ; le reste demande le label `contract-change` ; une partie peut être confiée à un autre lanceur que Vitest | `tests/acceptance/`, `scripts/check-contract.mjs`, `scripts/contract-files.mjs` |
 | Scénarios cachés | L'implémentation satisfait l'intention, pas seulement les tests qu'elle voit : parcours écrits avec la spec, retirés du workspace du producteur, joués en CI | `tests/holdout/`, `scripts/holdout.mjs`, `/new-spec`, `/implement` |
 | Relecture de spec | Critères testables et tests qui les vérifient, avant la lecture humaine | subagent `spec-reviewer`, `/new-spec`, `/review` |
 | Plan en tâches | 3 à 5 tâches par spec, groupes parallèles, périmètre en chemins | subagent `planner`, `/plan`, `scripts/plan-gate.mjs`, `scripts/split-plan.mjs` |
@@ -124,7 +124,7 @@ volumes:
 - `vitest.config.ts` : l'environnement de test (ex. `jsdom`) et ce qui sort de la couverture (point d'entrée, écrans sans logique si l'ADR le décide). Les fichiers `.tsx` sont déjà pris en compte par les tests, la couverture et la mutation.
 - `package.json` : le script `dev` (bundler, simulateur) ; `.gitignore` : les dossiers générés par le framework (Biome suit `.gitignore`).
 - Tests de contrat et scénarios cachés : ils passent par l'interface rendue, en `SPEC-XXXX.test.tsx`. Une spec qui couvre une API et un écran répartit son contrat en fichiers suffixés (`SPEC-XXXX.api.test.ts`, `SPEC-XXXX.ui.test.tsx`).
-- Tests d'interface hors de portée de Vitest (ex. rendu React Native) : le lanceur ajouté est une nouvelle dépendance à justifier, et `pnpm verify` doit l'enchaîner.
+- Tests d'interface hors de portée de Vitest (ex. rendu React Native, documenté avec Jest) : le lanceur ajouté est une dépendance à justifier. Le contrat et les scénarios cachés concernés prennent un suffixe (`SPEC-XXXX.native.test.tsx`) déclaré dans `package.json` : `"factory": { "contractRunners": { "native": "test:native" } }`, où `test:native` reçoit les fichiers en arguments et écrit un rapport JSON au format de Jest dans `$CONTRACT_REPORT` (ex. `jest --json --outputFile=$CONTRACT_REPORT`). Vitest ignore alors ces fichiers ; `pnpm test:contract` (dans `pnpm verify` et en CI) joue le contrat, `scripts/holdout.mjs` les scénarios cachés (avec `HOLDOUT=1`). Restent à la charge de SPEC-0000 : le typage de ces fichiers (les sortir de `tsconfig.test.json` s'ils utilisent les globaux du lanceur), leur couverture et leur mutation (configuration propre au lanceur, ou exclusion explicite des seuils et de l'étape de mutation de la CI).
 - Tailwind est imposé par la factory pour toute interface (NativeWind pour React Native) ; il est consigné dans l'ADR-0001, et SPEC-0000 le pose.
 - `docs/factory/RISK.md`, `.github/labeler.yml`, `docs/factory/DOMAIN-SECURITY.md` : les zones et règles par défaut visent une API.
 
@@ -140,7 +140,7 @@ Copie `.claude/`, `.conductor/`, `.github/`, `.mcp.json`, `.gitleaks.toml`, `lef
 
 - Les scénarios cachés sont retirés du workspace, pas de l'historique git : la barrière arrête l'accident (une recherche, un `pnpm test`), pas un agent qui irait les chercher. Deux règles `deny` de `.claude/settings.json` ferment les chemins les plus directs.
 - Le relecteur au niveau `full` change de modèle, pas de famille de modèles : les erreurs communes à tous les modèles d'un même éditeur ne sont pas couvertes.
-- Outillage lié à TypeScript, pnpm, Biome et Vitest. Les scripts de la factory (`scripts/*.mjs`) n'ont besoin que de Node et de git ; pour une autre stack, il faut réécrire `pnpm verify`, la CI et le hook Biome de `.claude/settings.json`.
+- Outillage lié à TypeScript, pnpm, Biome et Vitest. Un autre lanceur peut jouer une partie du contrat et des scénarios cachés (`factory.contractRunners`, voir « Options ») ; la couverture et la mutation livrées restent celles de Vitest et Stryker. Les scripts de la factory (`scripts/*.mjs`) n'ont besoin que de Node et de git ; pour une autre stack, il faut réécrire `pnpm verify`, la CI et le hook Biome de `.claude/settings.json`.
 - Le rapport de tokens lit les transcripts locaux de Claude Code (`~/.claude/projects/`) : il dépend de leur format et du nom du dossier du dépôt.
 - Les baux reposent sur les variables `CONDUCTOR_ROOT_PATH` et `CONDUCTOR_WORKSPACE_PATH` : hors Conductor, ils se replient sur le dossier courant et ne protègent plus rien entre deux clones.
 - La règle `Read(.env.*)` de `.claude/settings.json` couvre aussi `.env.example` : un agent ne peut ni le lire ni l'écrire avec ses outils de fichiers. Remplace-la par `Read(.env.local)` si tu veux que les tâches le tiennent à jour.

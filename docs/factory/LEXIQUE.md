@@ -200,7 +200,8 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 | `split-plan.mjs` | Extrait d'une tâche et de ses critères |
 | `check-contract.mjs` | Tests de contrat modifiés seulement par le retrait de `.skip` ; scénarios cachés ni modifiés ni supprimés |
 | `holdout.mjs` | Scénarios cachés : retrait du workspace, exécution en CI avec décompte seul |
-| `pre-review.mjs` | Pré-revue, niveau de revue, choix du relecteur, brief du relecteur |
+| `contract-files.mjs` | Nommage des fichiers de contrat et de scénarios (suffixes) ; contrat confié à un autre lanceur que Vitest (`pnpm test:contract`) |
+| `pre-review.mjs` | Pré-revue, niveau de revue, choix du relecteur, brief du relecteur, zones de risque mortes |
 | `review-gate.mjs` | Enregistrement et contrôle du verdict, trace dans la PR |
 | `security-scan.mjs` | Semgrep et gitleaks, en local comme en CI |
 | `verify-quiet.mjs` | `pnpm verify` à sortie filtrée |
