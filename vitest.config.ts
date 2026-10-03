@@ -20,9 +20,10 @@ const otherRunners = Object.keys(pkg.factory?.contractRunners ?? {}).map(
 export default defineConfig({
   test: {
     include: holdout ? ["tests/holdout/**/*.test.{ts,tsx}"] : ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
+    // tests/e2e : tests sur cible réelle, joués par leur propre lanceur (`pnpm test:e2e`), en CI seulement.
     exclude: holdout
       ? [...configDefaults.exclude, ...otherRunners]
-      : [...configDefaults.exclude, "tests/holdout/**", ...otherRunners],
+      : [...configDefaults.exclude, "tests/holdout/**", "tests/e2e/**", ...otherRunners],
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
