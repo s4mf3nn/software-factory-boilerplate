@@ -25,7 +25,7 @@ Qui agit dans cette spec, et pour chaque action exposée (route, écran, command
 - Message d'une file reçu deux fois, ou consommateur en échec (consommateur idempotent, erreur remontée)
 
 ## Contrat d'interface
-Entrées et sorties exactes de l'interface publique (pour une API HTTP : méthode, chemin, corps, codes de statut, format d'erreur ; pour une application web ou mobile : voir « Écrans » ; pour une CLI : arguments, sorties, codes de retour ; pour une bibliothèque : fonctions et types exportés par le point d'entrée du paquet, erreurs levées ; pour des outils exposés à un agent, ex. serveur MCP : nom de chaque outil, schéma d'entrée, sortie, erreurs, et effet déclaré : lecture seule, action externe, action destructive).
+Entrées et sorties exactes de l'interface publique (pour une API HTTP : méthode, chemin, corps, codes de statut, format d'erreur ; pour une application web ou mobile : voir « Écrans » ; pour une CLI : arguments, sorties, codes de retour ; pour une bibliothèque : fonctions et types exportés par le point d'entrée du paquet, erreurs levées).
 
 ## Écrans
 Pour une interface web ou mobile ; supprimer la section sinon. Un bloc par écran :
