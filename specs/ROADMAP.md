@@ -8,4 +8,5 @@ n'est pas livrée (contrat encore en `.skip`). Une ligne par tranche verticale l
 | Ordre | Milestone | Spec | Objet | Dépend de |
 |---|---|---|---|---|
 | 1 | Socle | SPEC-0000 | Bootstrap du projet | aucune |
-| 2 | <milestone> | à écrire | <objet> | SPEC-0000 |
+| 2 | Socle | SPEC-0001 | Livraison et cible réelle | SPEC-0000 |
+| 3 | <milestone> | à écrire | <objet> | SPEC-0000 |

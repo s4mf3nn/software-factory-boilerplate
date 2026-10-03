@@ -39,7 +39,7 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Transactions (si persistance) : <pilote et mode de connexion qui les permettent depuis le runtime (ex. un pilote HTTP sans transaction interactive ne convient pas à une écriture en plusieurs requêtes), niveau d'isolation par défaut>
 - Contraintes portées par la base (si persistance) : <ce que la base garantit seule (unicité, clés étrangères, vérifications) ; dossier des migrations, à classer en zone sensible>
 - Secrets et variables d'environnement : <à compléter>
-- Livraison : <cible (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml`, mode à blanc s'il existe, secrets de l'environnement GitHub `production`, retour arrière, fichiers de livraison à classer en zone de risque>
+- Livraison : <cible de chaque application (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml` (posée par SPEC-0001), mode à blanc s'il existe, secrets de l'environnement GitHub `production`, ordre migrations puis code (migrations compatibles avec la version précédente du code), retour arrière de chaque application (commande ou procédure), fichiers de livraison à classer en zone de risque>
 
 ## Conséquences
 - Aucun fichier central n'est édité à la main pour ajouter une feature.
