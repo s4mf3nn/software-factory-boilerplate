@@ -56,3 +56,4 @@ jobs:
         # Secrets de l'environnement `production` : à exposer ici par SPEC-0001, un par ligne, jamais en argument.
         # env:
         #   RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        #   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }} # envoi des sourcemaps (observabilité, ADR-0001)

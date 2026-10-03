@@ -13,6 +13,10 @@
           - "**/shared/**/auth*"
           - "**/features/admin/**"
           - "**/config/**"
+          # Suivi des erreurs (Sentry, imposé par la factory) : filtre des données personnelles et configuration.
+          - "**/shared/monitoring/**"
+          - "**/sentry.*"
+          - "**/.sentryclirc"
           # La factory elle-même
           - ".github/**"
           - ".claude/**"
@@ -31,6 +35,9 @@
           - "**/shared/**/auth*"
           - "**/features/admin/**"
           - "**/config/**"
+          - "**/shared/monitoring/**"
+          - "**/sentry.*"
+          - "**/.sentryclirc"
           - "docker-compose.yml"
 
 "risk:medium":

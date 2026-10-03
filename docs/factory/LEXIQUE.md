@@ -39,7 +39,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Port** : chaque workspace reçoit le sien (`$CONDUCTOR_PORT`), pour que plusieurs applications locales (serveur d'API, serveur de développement web ou mobile) tournent en même temps.
 - **Permissions de l'agent** : liste des commandes autorisées sans confirmation et des actions refusées (`.claude/settings.json`). Sont refusés : le push forcé, `--no-verify`, la lecture des `.env`.
 - **Hook d'agent** : commande lancée automatiquement après une action de l'agent. La factory en a un : le formatage par Biome après chaque édition de fichier.
-- **MCP** : protocole par lequel un agent accède à des outils externes. La factory n'en garde qu'un pour le projet (Context7) et refuse les autres connecteurs, qui alourdissent le contexte.
+- **MCP** : protocole par lequel un agent accède à des outils externes. La factory en garde deux pour le projet (Context7, et Sentry en lecture seule) et refuse les autres connecteurs, qui alourdissent le contexte.
 - **`.context/`** : dossier du workspace ignoré par git, pour les fichiers de travail (verdict de revue, log de vérification).
 - **`.factory/`** : dossier du dépôt principal ignoré par git, visible de tous les workspaces. Il contient les baux.
 - **Commande de la factory** : commande slash définie dans `.claude/commands/`, qui décrit une étape du cycle (voir « Les commandes »).
@@ -155,6 +155,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **Label `contract`** : posé automatiquement quand une PR touche `tests/acceptance/` ou `tests/holdout/`.
 - **Code owners** : `.github/CODEOWNERS` désigne l'humain propriétaire des chemins à risque élevé.
 - **Livraison** : mise à disposition des utilisateurs (déploiement, publication sur un store ou un registre de paquets). Workflow `release` lancé à la main par l'humain, depuis un commit de `main` dont `gates` est vert, avec l'approbation et les secrets de l'environnement `production` ; la commande `pnpm release` est posée par SPEC-0001. Les migrations restent compatibles avec la version précédente du code, et le retour arrière est écrit dans l'ADR-0001.
+- **Observabilité** : remontée des erreurs de production à Sentry, imposé par la factory pour toute application qui s'exécute, par le service « suivi des erreurs » (`src/shared/monitoring/`), avec la version livrée et sans donnée personnelle. Posée par SPEC-0001.
 - **Sécurité propre au domaine** : règles de sécurité spécifiques au produit (`DOMAIN-SECURITY.md`), lues par l'agent et le relecteur sur les zones concernées.
 - **Gates** : contrôles de CI qu'une PR doit passer : `pr-title`, `gates` (typage, lint, tests, contrat, build, scénarios cachés, mutation), `e2e` (tests sur cible réelle, si le projet a un script `test:e2e`), `security` (gitleaks, Semgrep), `review-trace`. `gates` et `security` tournent aussi sur `main` après chaque fusion.
 - **gitleaks / Semgrep** : détection de secrets dans les commits, et analyse statique de sécurité. Lancés au `pre-push` (avertissement si l'outil est absent) et en CI (`scripts/security-scan.mjs`).
@@ -200,7 +201,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 | `/new-spec <besoin>` | Rédige la spec, les tests de contrat en `describe.skip` et les scénarios cachés, après avoir posé ses questions ; les fait relire (`spec-reviewer`) et ouvre la PR de spec | L'humain relit et fusionne la PR de spec |
 | `/plan <SPEC>` | Découpe la spec en tâches (subagent `planner`) et ouvre la PR de plan | L'humain relit et fusionne la PR de plan |
 | `/implement <SPEC> <T#>` | Implémente une tâche : bail, tests, code, vérification, revue, puis `/ship` | L'agent enchaîne seul |
-| `/fix <issue \| description>` | Corrige un bug sur une spec livrée : classement (code ou spec en cause), bail, test qui reproduit le bug, correction, vérification, revue, puis `/ship` | L'agent enchaîne seul ; il s'arrête si c'est la spec qui est en cause |
+| `/fix <issue \| lien Sentry \| description>` | Corrige un bug sur une spec livrée : classement (code ou spec en cause), bail, test qui reproduit le bug, correction, vérification, revue, puis `/ship` | L'agent enchaîne seul ; il s'arrête si c'est la spec qui est en cause |
 | `/review` | Pré-revue par script puis revue adversariale (`reviewer`, ou `spec-reviewer` pour une PR de spec) ; enregistre le verdict | L'agent corrige si besoin |
 | `/ship` | Vérifie, contrôle la revue, pousse et ouvre la PR | La CI, puis l'humain |
 | `/resolve` | Rebase sur `main` ; résout un petit conflit ou demande de régénérer | `/ship` pour repousser |
@@ -242,6 +243,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 | commitlint | Format des messages de commit |
 | gitleaks, Semgrep | Secrets et analyse statique de sécurité |
 | Context7 | Documentation des bibliothèques à version épinglée |
+| Sentry | Suivi des erreurs de production (imposé pour toute application qui s'exécute) ; serveur MCP en lecture seule pour `/fix` et `/retro` |
 | GitHub Actions | Gates, trace de revue, labels de risque |
 
 ## Les seuils

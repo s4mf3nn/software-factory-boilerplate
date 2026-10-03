@@ -11,6 +11,7 @@ Chaque règle doit pouvoir être contrôlée sur un diff, et dit ce qui la véri
 | Toute écriture exposée (route, formulaire, commande) passe par l'authentification et l'autorisation, vérifiées là où la donnée est stockée et pas seulement dans l'interface | Test de contrat du refus (sans session, rôle insuffisant, ressource d'un autre utilisateur) |
 | Aucun secret dans ce qui est livré à un client (bundle web, application mobile, paquet publié) | gitleaks, relecteur |
 | Les messages d'erreur ne révèlent ni détail interne ni donnée d'un autre utilisateur | Test de contrat sur le format d'erreur, relecteur |
+| Aucune donnée personnelle (email, coordonnées, contenu saisi, en-tête d'authentification, cookie) n'est envoyée au suivi des erreurs ni écrite dans les logs | Test de contrat sur le faux du suivi des erreurs (SPEC-0001), relecteur |
 
 ## Règles par défaut selon le type d'application
 

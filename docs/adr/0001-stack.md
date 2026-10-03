@@ -14,6 +14,7 @@ Imposé par la factory (chaîne d'outils, déjà en place dans le dépôt) :
 - Qualité : Biome (lint et format), Lefthook, commitlint.
 - Structure par feature avec montage automatique via un fichier généré (`pnpm gen`).
 - Style : Tailwind pour toute application avec interface (NativeWind pour React Native, statut `choisie`) ; sans objet pour une API ou une CLI. Dernière version stable à l'initialisation, vérifiée dans la documentation.
+- Observabilité : Sentry pour toute application qui s'exécute chez l'utilisateur ou sur un serveur (API, web, mobile ; CLI si ce tableau le décide), avec le SDK de son runtime ; sans objet pour une bibliothèque. Dernière version stable à l'initialisation, vérifiée dans la documentation. Il passe par le service tiers « suivi des erreurs » (`src/shared/monitoring/`, faux en test) et ne reçoit aucune donnée personnelle.
 
 Technologies du projet. Statuts : `imposée` (exigée par l'utilisateur ; ne change que par une nouvelle ADR), `choisie` (proposée par l'agent et validée), `à décider` (le premier travail qui en a besoin la tranche par ADR).
 
@@ -38,7 +39,7 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Ressource de données par workspace : <mécanisme, ou « aucune »>
 - Transactions (si persistance) : <pilote et mode de connexion qui les permettent depuis le runtime (ex. un pilote HTTP sans transaction interactive ne convient pas à une écriture en plusieurs requêtes), niveau d'isolation par défaut>
 - Contraintes portées par la base (si persistance) : <ce que la base garantit seule (unicité, clés étrangères, vérifications) ; dossier des migrations, à classer en zone sensible>
-- Secrets et variables d'environnement : <à compléter>
+- Secrets et variables d'environnement : <à compléter ; au minimum le DSN Sentry de chaque application (variable d'environnement, absent en test et en développement local : le suivi est alors inactif) et le jeton d'envoi des sourcemaps (environnement `production` seulement)>
 - Livraison : <cible de chaque application (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml` (posée par SPEC-0001), mode à blanc s'il existe, secrets de l'environnement GitHub `production`, ordre migrations puis code (migrations compatibles avec la version précédente du code), retour arrière de chaque application (commande ou procédure), fichiers de livraison à classer en zone de risque>
 
 ## Conséquences

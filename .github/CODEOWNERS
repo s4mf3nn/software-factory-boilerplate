@@ -6,6 +6,9 @@
 **/features/auth/            @{{GITHUB_OWNER}}
 **/shared/**/auth*           @{{GITHUB_OWNER}}
 **/features/admin/           @{{GITHUB_OWNER}}
+**/shared/monitoring/        @{{GITHUB_OWNER}}
+**/sentry.*                  @{{GITHUB_OWNER}}
+**/.sentryclirc              @{{GITHUB_OWNER}}
 **/config/                   @{{GITHUB_OWNER}}
 /tests/acceptance/           @{{GITHUB_OWNER}}
 /tests/holdout/              @{{GITHUB_OWNER}}

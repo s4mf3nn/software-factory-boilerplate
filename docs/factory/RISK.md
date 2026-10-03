@@ -7,6 +7,7 @@ La source technique est `.github/labeler.yml` (lue par la CI et par `scripts/pre
 | Sensible | <zones sensibles du domaine, voir `DOMAIN-SECURITY.md`> | <à compléter> | `full` (Opus) | Revue humaine approfondie, jamais d'auto-merge |
 | Sensible | `**/features/auth/`, `**/shared/**/auth*`, `**/features/admin/` | Accès, rôles et abus ; une surface d'administration agit sur les données de tous | `full` (Opus) | Idem |
 | Sensible | `**/migrations/`, `**/config/`, `docker-compose.yml` | Données et environnement | `full` (Opus) | Idem |
+| Sensible | `**/shared/monitoring/`, `**/sentry.*`, `**/.sentryclirc` | Suivi des erreurs : une fuite y envoie des données personnelles à un tiers | `full` (Opus) | Idem |
 | Élevé | `.github/`, `scripts/`, `CLAUDE.md`, `.claude/` | Modifient la factory elle-même | `standard` (Sonnet) | Revue humaine obligatoire, jamais d'auto-merge |
 | Contrat | `tests/acceptance/`, `tests/holdout/` | Définissent ce qui est juste | Label `contract` ; toute modification après fusion demande `contract-change` |
 | Moyen | `service.ts`, `repo.ts`, `**/db/schema/`, `**/shared/`, `package.json` de chaque paquet, point d'entrée de chaque application (posé par SPEC-0000) | Logique métier, code partagé entre features, dépendances | Revue humaine rapide : spec, tests, résumé |
