@@ -8,6 +8,9 @@
 /tests/acceptance/           @{{GITHUB_OWNER}}
 /tests/holdout/              @{{GITHUB_OWNER}}
 /specs/                      @{{GITHUB_OWNER}}
+/docs/PRODUCT.md             @{{GITHUB_OWNER}}
+/docs/DOMAIN.md              @{{GITHUB_OWNER}}
+/docs/adr/                   @{{GITHUB_OWNER}}
 /.github/                    @{{GITHUB_OWNER}}
 /scripts/                    @{{GITHUB_OWNER}}
 /CLAUDE.md                   @{{GITHUB_OWNER}}

@@ -22,6 +22,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 
 | Mécanisme | Ce qu'il garantit | Fichiers |
 |---|---|---|
+| Cadrage produit | Un brief devient un produit, un domaine (invariants, cycles de vie) et une suite ordonnée de specs ; une spec ne se planifie pas avant ses dépendances | `docs/PRODUCT.md`, `docs/DOMAIN.md`, `specs/ROADMAP.md`, `/roadmap`, `scripts/plan-gate.mjs` |
 | Spec contrat | Pas de code sans spec ; critères numérotés `CA#` | `specs/_template/spec.md`, `/new-spec` |
 | Tests de contrat immuables | Un agent ne peut que retirer `.skip` ; le reste demande le label `contract-change` ; une partie peut être confiée à un autre lanceur que Vitest | `tests/acceptance/`, `scripts/check-contract.mjs`, `scripts/contract-files.mjs` |
 | Scénarios cachés | L'implémentation satisfait l'intention, pas seulement les tests qu'elle voit : parcours écrits avec la spec, retirés du workspace du producteur, joués en CI | `tests/holdout/`, `scripts/holdout.mjs`, `/new-spec`, `/implement` |
@@ -61,6 +62,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 6. Crée un `.env` à la racine du dépôt principal si le projet a des variables d'environnement (il est relié dans chaque workspace par le setup).
 7. Ajoute le dépôt dans Conductor : `.conductor/settings.toml` déclare déjà les scripts de setup, d'archivage et de lancement.
 8. Dans un premier workspace : `/plan SPEC-0000`, fusionne la PR de plan, puis `/implement SPEC-0000 T1` dans un nouveau workspace. SPEC-0000 s'exécute seule, avant toute autre spec.
+9. En parallèle de SPEC-0000, dans un autre workspace : `/roadmap <brief>` (cadrage produit, domaine et ordre des specs), fusionne la PR de cadrage, puis enchaîne les `/new-spec` dans l'ordre de `specs/ROADMAP.md`.
 
 ## À personnaliser
 
@@ -76,6 +78,7 @@ Le cycle complet est décrit dans `docs/factory/WORKFLOW.md`, et chaque concept 
 | `tsconfig.json`, `tsconfig.test.json` | `jsx`, `lib` et `types` selon le type d'application (voir « Options ») |
 | `vitest.config.ts`, `.github/workflows/ci.yml` | Environnement de test ; points d'entrée exclus de la couverture et de la mutation ; services de CI |
 | `.env.example` | À créer : variables attendues, avec des clés factices `test-key` ou `key-<nom>` (convention de `.gitleaks.toml`) |
+| `docs/PRODUCT.md`, `docs/DOMAIN.md`, `specs/ROADMAP.md` | Remplis par `/roadmap <brief>`, pas à la main |
 | `docs/factory/WORKFLOW.md` | La roadmap d'autonomie (proposition à ajuster) ; la phase de départ est fixée par `--phase` |
 
 ## Réglages GitHub

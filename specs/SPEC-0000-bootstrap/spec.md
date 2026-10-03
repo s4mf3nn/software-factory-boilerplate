@@ -2,6 +2,7 @@
 
 Statut : BROUILLON
 Risque estimé : élevé (fonde toutes les conventions)
+Dépend de : aucune
 Tests de contrat : `tests/acceptance/SPEC-0000.test.ts`
 
 ## Objectif

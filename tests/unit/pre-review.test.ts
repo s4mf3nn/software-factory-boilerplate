@@ -188,6 +188,15 @@ describe("scripts/pre-review.mjs", () => {
     expect(mod.reviewKind([])).toBe("code");
   });
 
+  it("reviews product framing (product, domain, roadmap, numbered ADR) like a spec", () => {
+    const cadrage = ["docs/PRODUCT.md", "docs/DOMAIN.md", "specs/ROADMAP.md", "docs/adr/0002-auth.md"];
+    expect(mod.reviewKind(cadrage)).toBe("spec");
+    expect(mod.reviewKind([...cadrage, "specs/SPEC-0003-export/spec.md"])).toBe("spec");
+    expect(mod.reviewKind(["docs/adr/_template.md"])).toBe("code");
+    expect(mod.reviewKind(["docs/factory/WORKFLOW.md"])).toBe("code");
+    expect(mod.reviewKind(["docs/PRODUCT.md", "src/app.ts"])).toBe("code");
+  });
+
   it("contrôle le périmètre par fichier ou dossier", () => {
     const paths = ["src/features/links/", "web/src/form"];
     expect(mod.inPerimeter("src/features/links/routes.ts", paths)).toBe(true);

@@ -62,6 +62,11 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **`contract-change`** : label posé par l'humain sur une PR pour autoriser une modification de test de contrat ou de scénario caché.
 - **PR de spec** : PR qui ne contient que la spec, son test de contrat et ses scénarios cachés. Relue par le `spec-reviewer`, puis relue et fusionnée par l'humain avant tout plan.
 - **SPEC-0000 (bootstrap)** : première spec d'un projet, qui pose le socle technique. Exécutée seule, par un seul agent, avant toute autre.
+- **Cadrage** : documents qui précèdent les specs et qu'elles ne contredisent pas : `docs/PRODUCT.md` (problème, hypothèses, rôles, parcours, données personnelles, KPI et événements produit), `docs/DOMAIN.md` (vocabulaire, invariants, cycles de vie) et `specs/ROADMAP.md`. Rédigés par `/roadmap`, relus par le `spec-reviewer`, fusionnés par l'humain dans une **PR de cadrage**.
+- **Roadmap des specs** : `specs/ROADMAP.md`, suite ordonnée de tranches verticales, chacune une spec, avec ses dépendances.
+- **Tranche verticale** : fonctionnalité livrable et testable seule par son interface publique, de bout en bout (pas une couche technique isolée).
+- **Invariant** : règle du domaine toujours vraie (`INV#`), avec ce qui la garantit (contrainte de la base, transaction, validation).
+- **Dépendance entre specs** : ligne `Dépend de` d'une spec. `scripts/plan-gate.mjs` refuse de planifier une spec dont une dépendance n'est pas **livrée**, c'est-à-dire dont un fichier de contrat garde son `.skip` sur `origin/main`.
 - **ADR** : compte rendu de décision d'architecture (`docs/adr/`). Explique un choix technique durable et ce que les agents doivent respecter. L'ADR-0001 fixe la stack.
 
 ## 4. Le plan et les tâches
@@ -80,7 +85,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **PR de tâche** : PR ouverte par `/ship` à la fin d'une tâche. Une spec donne donc une PR de spec, une PR de plan, puis une PR par tâche.
 - **Prompt de tâche** : la ligne `/implement SPEC-XXXX T#` que l'humain colle dans un nouveau workspace pour lancer une tâche. `/plan` les fournit, à utiliser après fusion de la PR de plan.
 - **Petit et jetable** : principe de dimensionnement. Une tâche tient dans le contexte d'un agent, un workspace ne sert qu'à une tâche, et une branche qui pose problème se jette et se régénère plutôt que de se réparer longuement.
-- **Contrôle du plan** : `scripts/plan-gate.mjs` vérifie qu'un plan `PRÊT` et la tâche demandée sont sur `origin/main` avant toute implémentation.
+- **Contrôle du plan** : `scripts/plan-gate.mjs` vérifie qu'un plan `PRÊT` et la tâche demandée sont sur `origin/main` avant toute implémentation, et que les specs dont elle dépend sont livrées (`deps`, au début de `/plan`).
 - **Redécoupage** : réponse prévue quand une tâche dépasse le contexte de l'agent ou que la revue ne converge pas. On refait le plan plutôt que de forcer.
 
 ## 5. Le parallélisme
@@ -181,6 +186,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 
 | Commande | Rôle | Qui agit ensuite |
 |---|---|---|
+| `/roadmap <brief>` | Cadre le produit : `PRODUCT.md`, `DOMAIN.md`, `ROADMAP.md` et ADR à trancher, sans spec ; ouvre la PR de cadrage | L'humain relit et fusionne, puis lance les `/new-spec` dans l'ordre |
 | `/new-spec <besoin>` | Rédige la spec, les tests de contrat en `describe.skip` et les scénarios cachés, après avoir posé ses questions ; les fait relire (`spec-reviewer`) et ouvre la PR de spec | L'humain relit et fusionne la PR de spec |
 | `/plan <SPEC>` | Découpe la spec en tâches (subagent `planner`) et ouvre la PR de plan | L'humain relit et fusionne la PR de plan |
 | `/implement <SPEC> <T#>` | Implémente une tâche : bail, tests, code, vérification, revue, puis `/ship` | L'agent enchaîne seul |
@@ -197,7 +203,7 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 | Script | Rôle |
 |---|---|
 | `lease.mjs` | Baux de périmètre entre workspaces |
-| `plan-gate.mjs` | Le plan et la tâche sont-ils sur `origin/main` ? |
+| `plan-gate.mjs` | Le plan et la tâche sont-ils sur `origin/main` ? Les specs dont elle dépend sont-elles livrées ? |
 | `split-plan.mjs` | Extrait d'une tâche et de ses critères |
 | `check-contract.mjs` | Tests de contrat modifiés seulement par le retrait de `.skip` ; scénarios cachés ni modifiés ni supprimés |
 | `holdout.mjs` | Scénarios cachés : retrait du workspace, exécution en CI avec décompte seul |

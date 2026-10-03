@@ -13,7 +13,7 @@ Le type d'application (API, web, mobile, CLI…), la stack et leurs raisons sont
 - `pnpm test` : tests unitaires et d'acceptation
 - `pnpm verify` : typage, lint, tests avec couverture et contrôle de contrat. **Doit être vert avant de rendre la main.**
 - `pnpm gen` : régénère les fichiers `*.gen.ts` (ne jamais les éditer à la main)
-- `/implement`, `/fix`, `/review`, `/ship`, `/resolve`, `/land`, `/retro`, `/learn`, `/plan`, `/new-spec` : commandes de la factory (`.claude/commands/`)
+- `/roadmap`, `/new-spec`, `/plan`, `/implement`, `/fix`, `/review`, `/ship`, `/resolve`, `/land`, `/retro`, `/learn` : commandes de la factory (`.claude/commands/`)
 
 ## Règles de la factory (non négociables)
 
@@ -46,7 +46,7 @@ Détail et zones à risque élevé : `docs/factory/DOMAIN-SECURITY.md` (à lire 
 
 ## Contexte à charger
 
-Ne lis que ce dont la tâche a besoin : ce fichier, la spec, le plan, les fichiers de ton périmètre, et au besoin `docs/adr/`.
+Ne lis que ce dont la tâche a besoin : ce fichier, la spec, le plan, les fichiers de ton périmètre, et au besoin `docs/adr/` et `docs/DOMAIN.md` (vocabulaire, invariants, cycles de vie).
 
 ## Documentation des bibliothèques (Context7)
 

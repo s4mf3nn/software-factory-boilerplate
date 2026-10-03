@@ -5,7 +5,7 @@
 //   node scripts/pre-review.mjs level   niveau de revue : full | standard | light (selon .github/labeler.yml : `review:full`, `risk:high`/`risk:medium`)
 //   node scripts/pre-review.mjs mode    travail de spec ou hors spec (bail du workspace, branche spec-xxxx-t#-* ou spec-xxxx-fix-*)
 //   node scripts/pre-review.mjs brief   niveau, contrôles, fichiers et diff filtré, pour le subagent `reviewer`
-//   node scripts/pre-review.mjs kind    relecteur à lancer : spec (`spec-reviewer`) | code (`reviewer`)
+//   node scripts/pre-review.mjs kind    relecteur à lancer : spec (`spec-reviewer` : specs, cadrage, contrat) | code (`reviewer`)
 //   node scripts/pre-review.mjs zones   globs de .github/labeler.yml qui ne correspondent à aucun fichier suivi (avertissement)
 // Contrôles : fichiers modifiés dans le périmètre du bail, scénarios cachés retirés du workspace de tâche, tests de
 // contrat (check-contract), dépendances ajoutées et déclarées dans .pr-summary.md, section « Documentation consultée
@@ -91,9 +91,11 @@ export function reviewLevel(files, labelerText) {
   return "light";
 }
 
-const SPEC_FILE = /^(specs\/[^/]+\/spec\.md|tests\/(acceptance|holdout)\/.+)$/;
+// Cadrage (produit, domaine, roadmap, ADR numérotées) : relu comme une spec, il décide du quoi et pas du comment.
+const SPEC_FILE =
+  /^(specs\/[^/]+\/spec\.md|specs\/ROADMAP\.md|docs\/(PRODUCT|DOMAIN)\.md|docs\/adr\/\d{4}-[^/]+\.md|tests\/(acceptance|holdout)\/.+)$/;
 
-/** `spec` si le diff ne contient que des specs, des tests de contrat et des scénarios cachés ; sinon `code`. */
+/** `spec` si le diff ne contient que des specs, du cadrage, des tests de contrat et des scénarios cachés ; sinon `code`. */
 export function reviewKind(files) {
   return files.length > 0 && files.every((f) => SPEC_FILE.test(f)) ? "spec" : "code";
 }
