@@ -93,7 +93,7 @@ export function reviewLevel(files, labelerText) {
 
 // Cadrage (produit, domaine, roadmap, ADR numérotées) : relu comme une spec, il décide du quoi et pas du comment.
 const SPEC_FILE =
-  /^(specs\/[^/]+\/spec\.md|specs\/ROADMAP\.md|docs\/(PRODUCT|DOMAIN)\.md|docs\/adr\/\d{4}-[^/]+\.md|tests\/(acceptance|holdout)\/.+)$/;
+  /^(specs\/[^/]+\/(spec\.md|maquettes\/.+)|specs\/ROADMAP\.md|docs\/(PRODUCT|DOMAIN)\.md|docs\/adr\/\d{4}-[^/]+\.md|tests\/(acceptance|holdout)\/.+)$/;
 
 /** `spec` si le diff ne contient que des specs, du cadrage, des tests de contrat et des scénarios cachés ; sinon `code`. */
 export function reviewKind(files) {

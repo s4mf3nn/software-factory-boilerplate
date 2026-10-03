@@ -197,6 +197,12 @@ describe("scripts/pre-review.mjs", () => {
     expect(mod.reviewKind(["docs/PRODUCT.md", "src/app.ts"])).toBe("code");
   });
 
+  it("reviews screen mockups with their spec", () => {
+    const files = ["specs/SPEC-0004-swipe/spec.md", "specs/SPEC-0004-swipe/maquettes/card.png"];
+    expect(mod.reviewKind(files)).toBe("spec");
+    expect(mod.reviewKind(["specs/SPEC-0004-swipe/plan.md", "specs/SPEC-0004-swipe/maquettes/card.png"])).toBe("code");
+  });
+
   it("contrôle le périmètre par fichier ou dossier", () => {
     const paths = ["src/features/links/", "web/src/form"];
     expect(mod.inPerimeter("src/features/links/routes.ts", paths)).toBe(true);

@@ -29,5 +29,7 @@ Toute fonctionnalité métier.
 ## Contraintes
 Cette spec est exécutée **seule**, par un unique agent, avant toute autre.
 
+Avec une interface : elle remplit `docs/factory/UI.md` et pose les composants de base et les tokens de style qu'il cite.
+
 ## Questions ouvertes
 À vider avant de passer le statut à VALIDÉE.

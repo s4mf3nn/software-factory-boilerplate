@@ -52,6 +52,10 @@ Ce que la factory n'est pas : un agent autonome qui décide du produit, ni une r
 - **CU#** : variante utilisée pour le comportement d'une interface, non observable par le test de contrat et vérifié par des tests écrits dans les tâches.
 - **Cas limites** : section de la spec qui liste les entrées et situations anormales à traiter (vide, doublon, concurrence, dépendance indisponible).
 - **Contrat d'interface** : section de la spec qui fige les entrées et sorties exactes de l'interface publique.
+- **Écrans** : section de la spec d'une interface : pour chaque écran, sa maquette, ses états (chargement, vide, erreur, succès, accès refusé), les actions et leur effet. Chaque état a son test.
+- **Maquette** : image ou export fourni par l'humain, rangé dans `specs/SPEC-XXXX-*/maquettes/` avec la spec. Elle fixe la disposition ; la spec fait foi en cas d'écart.
+- **`UI.md`** : conventions communes à tous les écrans (tokens de style, composants de base, états standard, accessibilité), remplies par SPEC-0000 et lues par le relecteur sur un diff `.tsx`.
+- **Faux** : implémentation en mémoire d'un service que les tests ne peuvent pas appeler pour de vrai (service tiers, horloge, API du navigateur ou de l'appareil). Les tests de contrat le passent à l'application et vérifient par lui ce qui a été envoyé.
 - **Questions ouvertes** : section de la spec où l'agent consigne ce qui est ambigu. Elle doit être vide avant le statut `VALIDÉE` : un agent ne suppose rien sur les règles métier, il demande.
 - **Risque estimé** : niveau annoncé par la spec (faible, moyen, élevé), repris tâche par tâche dans le plan. C'est une prévision ; le niveau qui fait foi sur une PR est le label posé par la CI d'après les chemins réellement touchés.
 - **Hors périmètre** (d'une spec) : ce que la spec ne fait volontairement pas. À ne pas confondre avec le périmètre d'une tâche.
