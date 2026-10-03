@@ -23,6 +23,8 @@ Technologies du projet. Statuts : `imposée` (exigée par l'utilisateur ; ne cha
 
 Type d'application : <API ou service, application web, application mobile, CLI, bibliothèque, ou plusieurs>
 
+Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un point d'entrée par runtime dans chaque feature) ; ou un paquet par application. Voir le guide, « Options »>
+
 À préciser pour ce projet (une ligne du tableau suffit quand le choix y figure) : validation des entrées, persistance et migrations (ou « aucune »), tests d'interface (ou « aucun »), découpage interne d'une feature (fichiers de `src/features/<feature>/`).
 
 ### Implications
