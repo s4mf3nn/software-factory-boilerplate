@@ -100,6 +100,13 @@ describe("scripts/contract-files.mjs", () => {
     expect(node(ko, contractScript, "run").code).toBe(1);
   });
 
+  it("run fails when the runner exits 0 without writing a report", () => {
+    const dir = project({ "tests/acceptance/SPEC-0001.fake.test.ts": "ok", "fake-runner.mjs": "process.exit(0);" });
+    const res = node(dir, contractScript, "run");
+    expect(res.code).toBe(1);
+    expect(res.err).toContain("n'a écrit aucun rapport");
+  });
+
   it("run does nothing without a declared runner", () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), "contract-files-none-"));
     dirs.push(dir);

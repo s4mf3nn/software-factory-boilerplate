@@ -96,9 +96,14 @@ function runAcceptance() {
     console.log(`Contrat : ${group.length} fichier(s) joué(s) par le script ${script}`);
     const report = path.join(".context", `contract-${script.replace(/[^a-zA-Z0-9-]/g, "-")}.json`);
     fs.mkdirSync(path.dirname(report), { recursive: true });
+    fs.rmSync(report, { force: true });
     const res = runScript(script, group, report);
     if (res.status !== 0) {
       console.error(`Contrat : échec du script ${script} (code ${res.status ?? res.error?.message})`);
+      code = 1;
+    } else if (!fs.existsSync(report)) {
+      // Un lanceur qui sort en 0 sans rapport n'a peut-être rien joué : même exigence que scripts/holdout.mjs.
+      console.error(`Contrat : le script ${script} n'a écrit aucun rapport dans $CONTRACT_REPORT`);
       code = 1;
     }
   }
