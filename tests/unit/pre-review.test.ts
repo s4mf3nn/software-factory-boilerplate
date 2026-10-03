@@ -8,6 +8,9 @@ interface PreReview {
   workMode(hasLease: boolean, branch: string): string;
   isFixBranch(branch: string): boolean;
   hasRegressionTest(files: string[]): boolean;
+  routeDirs(pkg: unknown): string[];
+  isRouteFile(file: string, dirs: string[]): boolean;
+  isThinRoute(text: string): boolean;
   labelGlobs(text: string, label: string): string[];
   labelNames(text: string): string[];
   deadZones(text: string, files: string[]): { label: string; glob: string }[];
@@ -134,6 +137,35 @@ describe("scripts/pre-review.mjs", () => {
     expect(mod.hasRegressionTest(["src/features/links/service.ts"])).toBe(false);
     expect(mod.hasRegressionTest(["tests/acceptance/SPEC-0001.test.ts"])).toBe(false);
     expect(mod.hasRegressionTest(["tests/holdout/SPEC-0001.test.ts"])).toBe(false);
+  });
+
+  it("reads the route directories declared in package.json", () => {
+    expect(mod.routeDirs({})).toEqual([]);
+    expect(mod.routeDirs({ factory: { contractRunners: {} } })).toEqual([]);
+    expect(mod.routeDirs({ factory: { routeDirs: ["mobile/app"] } })).toEqual(["mobile/app"]);
+    expect(() => mod.routeDirs({ factory: { routeDirs: "mobile/app" } })).toThrow(/factory.routeDirs/);
+    expect(() => mod.routeDirs({ factory: { routeDirs: [1] } })).toThrow(/factory.routeDirs/);
+  });
+
+  it("treats only screens of a route directory as routes, not layouts, special files or tests", () => {
+    const dirs = ["mobile/app"];
+    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", dirs)).toBe(true);
+    expect(mod.isRouteFile("mobile/app/events/[id].tsx", dirs)).toBe(true);
+    expect(mod.isRouteFile("mobile/app/(tabs)/_layout.tsx", dirs)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/+not-found.tsx", dirs)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/events/id.test.tsx", dirs)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/icon.png", dirs)).toBe(false);
+    expect(mod.isRouteFile("mobile/src/features/events/screens/EventScreen.tsx", dirs)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", [])).toBe(false);
+  });
+
+  it("accepts a route that only re-exports a screen and rejects one with logic", () => {
+    expect(mod.isThinRoute('export { default } from "@/features/events/screens/EventScreen";\n')).toBe(true);
+    expect(mod.isThinRoute("// Écran d'une sortie\nexport { default } from '../../src/features/events';")).toBe(true);
+    expect(mod.isThinRoute("")).toBe(true);
+    expect(mod.isThinRoute('import { View } from "react-native";\nexport default function A() {}')).toBe(false);
+    expect(mod.isThinRoute('export { default } from "./x";\nconst a = 1;')).toBe(false);
+    expect(mod.isThinRoute("export default function Screen() { return null; }")).toBe(false);
   });
 
   it("lit les globs d'une étiquette", () => {

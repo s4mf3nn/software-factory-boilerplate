@@ -10,7 +10,8 @@
 //                                       SQL hors de toute zone `risk:high` (avertissements)
 // Contrôles : fichiers modifiés dans le périmètre du bail, scénarios cachés retirés du workspace de tâche, tests de
 // contrat (check-contract), dépendances ajoutées et déclarées dans .pr-summary.md, section « Documentation consultée
-// (Context7) » remplie, test de non-régression présent sur une branche de correctif (spec-xxxx-fix-*).
+// (Context7) » remplie, test de non-régression présent sur une branche de correctif (spec-xxxx-fix-*), routes fines
+// dans les dossiers de routage par fichiers (`factory.routeDirs` de package.json).
 // Variables : BASE_REF (défaut origin/main), CONDUCTOR_ROOT_PATH et CONDUCTOR_WORKSPACE_PATH (baux).
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -174,6 +175,29 @@ export function hasRegressionTest(files) {
   return files.some((f) => TEST_FILE.test(f) && !inPerimeter(f, ["tests/acceptance", "tests/holdout"]));
 }
 
+/** Dossiers de routage par fichiers déclarés dans `package.json` (`factory.routeDirs`), vide sans déclaration. */
+export function routeDirs(pkg) {
+  const dirs = pkg?.factory?.routeDirs ?? [];
+  if (!Array.isArray(dirs) || !dirs.every((d) => typeof d === "string"))
+    throw new Error('factory.routeDirs doit être une liste de dossiers (ex. ["mobile/app"])');
+  return dirs;
+}
+
+/** Route d'un dossier de routage : `.ts` ou `.tsx`, hors test, hors layout (`_layout`) et fichier spécial (`+not-found`). */
+export function isRouteFile(file, dirs) {
+  const name = path.basename(file);
+  if (!/\.tsx?$/.test(name) || TEST_FILE.test(name) || !inPerimeter(file, dirs)) return false;
+  return !name.startsWith("_") && !name.startsWith("+");
+}
+
+// Ligne vide, commentaire, ou réexport sur une ligne (`export { default } from "..."`).
+const THIN_ROUTE_LINE = /^\s*(\/\/.*|export\s.+\sfrom\s+["'][^"']+["'];?)?\s*$/;
+
+/** Une route fine ne fait que réexporter l'écran de sa feature : la logique reste dans `src/features/`, testée. */
+export function isThinRoute(text) {
+  return text.split("\n").every((line) => THIN_ROUTE_LINE.test(line));
+}
+
 /** Travail de spec si bail, HEAD détaché, branche de tâche `[préfixe/]spec-xxxx-t#-*` ou de correctif ; sinon hors spec (outillage). */
 export function workMode(hasLease, branch) {
   const isTaskBranch = /^(?:[^/]+\/)?spec-\d+-t\d+(-|$)/i.test(branch);
@@ -231,6 +255,15 @@ export function runChecks() {
     if (!hasRegressionTest(files))
       problems.push(
         "correctif sans test de non-régression : ajoute un test `*.test.ts` ou `*.test.tsx` qui reproduit le bug",
+      );
+  }
+
+  // Routage par fichiers : une route qui contient de la logique échappe aux tests, à la couverture et à la mutation.
+  const dirs = routeDirs(JSON.parse(fs.readFileSync("package.json", "utf8")));
+  for (const f of files.filter((file) => isRouteFile(file, dirs) && fs.existsSync(file))) {
+    if (!isThinRoute(fs.readFileSync(f, "utf8")))
+      problems.push(
+        `route avec de la logique : ${f} (une route ne fait que réexporter un écran de src/features/, ex. export { default } from "…")`,
       );
   }
 
