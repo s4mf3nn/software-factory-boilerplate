@@ -33,6 +33,8 @@ Disposition du dépôt : <une application ; ou plusieurs dans un seul paquet (un
 - Stratégie de test : <comment le contrat et les scénarios cachés s'exécutent sans processus externe. Si le runtime n'est pas Node, tests adaptés (ex. Hono : `app.request()`, ou pool de tests du runtime cible), et lanceur ajouté comme dépendance à justifier. Si une partie du contrat ne peut pas tourner sous Vitest (ex. rendu React Native), son suffixe et son script (`factory.contractRunners` de `package.json`), et ce que deviennent leur couverture et leur mutation>
 - Tests sur cible réelle : <navigateur, simulateur, paquet installé, ou « aucun » ; lanceur, runner de CI et versions de Node (variables `E2E_RUNNER`, `E2E_NODE_VERSIONS`)>
 - Commande `dev` : <à compléter>
+- Services tiers : <un par ligne : rôle (email, stockage d'objets, notifications, traceur d'événements, suivi des erreurs...), implémentation réelle, interface et faux dans `src/shared/<service>/`, ou « aucun ». Voir le guide, « Services tiers, horloge et faux »>
+- Tâches planifiées : <planificateur du runtime et branchement par le point d'entrée, ou « aucune »>
 - Ressource de données par workspace : <mécanisme, ou « aucune »>
 - Secrets et variables d'environnement : <à compléter>
 - Livraison : <cible (hébergement, store, registre de paquets, ou « aucune »), commande `pnpm release` lancée par `.github/workflows/release.yml`, mode à blanc s'il existe, secrets de l'environnement GitHub `production`, retour arrière, fichiers de livraison à classer en zone de risque>

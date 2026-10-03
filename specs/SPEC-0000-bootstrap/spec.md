@@ -14,7 +14,8 @@ Poser le socle technique décrit dans `docs/adr/0001-stack.md` pour que toutes l
 - **CA2** : `pnpm verify` passe sur un repo propre.
 - **CA3** : une feature ajoutée dans `src/features/<nom>/index.ts` est montée automatiquement après `pnpm gen`, sans modifier aucun autre fichier.
 - **CA4** : `pnpm dev` lance l'application en local (sur `$PORT` si elle écoute sur un port). Sans objet pour une bibliothèque.
-- **CA5** : si l'ADR-0001 prévoit une livraison, `pnpm release` existe, livre sur la cible décrite, et son mode à blanc passe quand la cible en offre un. Les secrets viennent de l'environnement GitHub `production`.
+- **CA5** : chaque service de la ligne « Services tiers » de l'ADR-0001 (et l'horloge) a une interface et un faux dans `src/shared/` ; la fabrique de l'application les reçoit, et un test de contrat le montre en passant les faux.
+- **CA6** : si l'ADR-0001 prévoit une livraison, `pnpm release` existe, livre sur la cible décrite, et son mode à blanc passe quand la cible en offre un. Les secrets viennent de l'environnement GitHub `production`.
 
 ## Contrat d'interface
 <!-- À compléter : point d'entrée testable sans processus externe (serveur, navigateur, simulateur), format d'erreur unique.

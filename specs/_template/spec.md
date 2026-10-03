@@ -16,7 +16,8 @@ Ce qui doit être vrai une fois la spec livrée, en deux ou trois phrases, du po
 ## Cas limites
 - Entrée vide, invalide, trop longue
 - Doublons, concurrence
-- Dépendance indisponible (base, cache, réseau)
+- Dépendance indisponible (base, cache, réseau, service tiers : simulée par son faux)
+- Temps : expiration, échéance, changement de jour ou de fuseau (horloge factice)
 
 ## Contrat d'interface
 Entrées et sorties exactes de l'interface publique (pour une API HTTP : méthode, chemin, corps, codes de statut, format d'erreur ; pour une application web ou mobile : voir « Écrans » ; pour une CLI : arguments, sorties, codes de retour ; pour une bibliothèque : fonctions et types exportés par le point d'entrée du paquet, erreurs levées).
