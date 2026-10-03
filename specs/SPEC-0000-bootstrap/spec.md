@@ -33,7 +33,7 @@ boilerplate (`docs/factory/BOILERPLATE.md`), section « Options ». -->
 - [ ] `scripts/workspace-data.sh` si la ressource de données n'est pas Postgres en Docker (appelé aussi par la CI, secret `WORKSPACE_DATA_TOKEN`) ; `db:migrate`
 - [ ] Interfaces et faux des services tiers et de l'horloge (CA5)
 - [ ] `docs/factory/UI.md`, composants de base et tokens de style (interface seulement)
-- [ ] Routage par fichiers : dossier déclaré dans `factory.routeDirs` de `package.json`, layouts qui lisent le registre généré (onglets, menu)
+- [ ] Routage par fichiers : dossier et fichiers hors routes déclarés dans `factory.routeDirs` et `factory.routeIgnore` de `package.json`, layouts qui lisent le registre généré (onglets, menu)
 - [ ] Point d'entrée de chaque application et dossier des migrations dans `.github/labeler.yml`, `RISK.md`, `CODEOWNERS`
 - [ ] `.env.example` avec des clés factices
 

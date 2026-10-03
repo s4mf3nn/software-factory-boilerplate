@@ -108,7 +108,7 @@ export function tasksPerGroup(plan) {
 /** Message si le plan de SPEC-0000 met plusieurs tâches dans un même groupe, sinon null. */
 export function sequentialProblem(spec, plan) {
   if (spec !== BOOTSTRAP_SPEC || tasksPerGroup(plan).every((n) => n <= 1)) return null;
-  return `le plan de ${spec} met plusieurs tâches dans un même groupe : le socle s'exécute une tâche à la fois (un groupe par tâche).`;
+  return `le plan de ${spec} met plusieurs tâches dans un même groupe (ou hors de tout groupe) : le socle s'exécute une tâche à la fois, un groupe « ## Groupe N » par tâche.`;
 }
 
 /** Contrôle le plan local, avant sa PR (`/plan`) : `{ ok, message }`. */

@@ -69,6 +69,8 @@ describe("scripts/ci-data.sh", () => {
   it("appends the suffix to the resource name (one per e2e matrix entry)", () => {
     const res = run(newProject(true), ["setup", "e2e_node22"]);
     expect(res.calls).toBe("setup ci_42_2_e2e_node22 _acme_social_app\n");
+    const dotted = run(newProject(true), ["setup", "E2E-node22.x"]);
+    expect(dotted.calls).toBe("setup ci_42_2_e2e_node22_x _acme_social_app\n");
   });
 
   it("archives only the resource created by setup and ignores its failure", () => {

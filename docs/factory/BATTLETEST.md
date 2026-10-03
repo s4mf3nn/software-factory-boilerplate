@@ -268,7 +268,7 @@ Lots livrés (un commit par lot) :
 
 | Lot | Contenu |
 |---|---|
-| 14. Routage par fichiers | Routes fines (réexport de l'écran de la feature), dossier déclaré dans `factory.routeDirs`, contrôle par `pre-review.mjs check` ; layouts qui lisent le registre généré, posés par SPEC-0000 |
+| 14. Routage par fichiers | Routes fines (réexport de l'écran de la feature), dossier déclaré dans `factory.routeDirs`, layouts et fichiers spéciaux dans `factory.routeIgnore`, contrôle par `pre-review.mjs check` ; layouts qui lisent le registre généré, posés par SPEC-0000 |
 | 15. Tâches asynchrones | Consommateurs déclarés par la feature (`consumers`), service « file » avec son faux, idempotence prouvée par le contrat, ligne « Files de messages » de l'ADR |
 | 16. Clients installés | Ligne « Clients installés » de l'ADR, version minimale refusée par l'API (`CLIENT_OUTDATED`, CA7 de SPEC-0001), retour arrière d'une application publiée, rappel par `/land` et `spec-reviewer` sur un changement de contrat |
 | 17. Ressource de données en CI | `scripts/ci-data.sh` appelle le `workspace-data.sh` du projet dans `gates` et `e2e`, avec un nom propre au run, puis supprime la ressource ; secret `WORKSPACE_DATA_TOKEN` |
@@ -278,7 +278,7 @@ Lots livrés (un commit par lot) :
 
 Décisions :
 
-1. Lot 14 : le contrôle des routes fines est **déclaratif** (`factory.routeDirs`), comme `factory.contractRunners` : aucun nom de framework dans un script. Sans cette clé, aucun contrôle.
+1. Lot 14 : le contrôle des routes fines est **déclaratif** (`factory.routeDirs`, `factory.routeIgnore`), comme `factory.contractRunners` : aucun nom de framework dans un script. Sans cette clé, aucun contrôle.
 2. Lot 16 : `CLIENT_OUTDATED` est posé par SPEC-0001 et non par une spec métier, parce qu'il doit exister avant la première version publiée : une version sans ce contrôle ne peut plus être refusée.
 3. Lot 17 : la CI réutilise le script du projet plutôt qu'un service Postgres, pour ne pas tester avec un pilote que la production n'utilise pas. Le service Postgres en Docker reste disponible (bloc commenté de `ci.yml`).
 4. Non retenus : couverture et mutation des écrans par un second lanceur (les routes sont vides et les écrans testés par le contrat), et parcours sur simulateur au-delà d'un parcours de fumée.

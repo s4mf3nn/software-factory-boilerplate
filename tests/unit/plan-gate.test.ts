@@ -233,7 +233,8 @@ describe("scripts/plan-gate.mjs, bootstrap plan", () => {
   it("requires one task per group for SPEC-0000 only", async () => {
     const mod = await load();
     expect(mod.sequentialProblem("SPEC-0000", SEQUENTIAL)).toBeNull();
-    expect(mod.sequentialProblem("SPEC-0000", PARALLEL)).toContain("un groupe par tâche");
+    expect(mod.sequentialProblem("SPEC-0000", PARALLEL)).toContain("une tâche à la fois");
+    expect(mod.sequentialProblem("SPEC-0000", PLAN)).toContain("hors de tout groupe");
     expect(mod.sequentialProblem("SPEC-0002", PARALLEL)).toBeNull();
   });
 
@@ -255,7 +256,7 @@ describe("scripts/plan-gate.mjs, bootstrap plan", () => {
     const repo = newRepo({ "specs/SPEC-0000-bootstrap/plan.md": PARALLEL });
     const res = check(repo, ["SPEC-0000", "T1"]);
     expect(res.code).toBe(1);
-    expect(res.err).toContain("un groupe par tâche");
+    expect(res.err).toContain("une tâche à la fois");
     const ok = newRepo({ "specs/SPEC-0000-bootstrap/plan.md": SEQUENTIAL });
     expect(check(ok, ["SPEC-0000", "T2"]).code).toBe(0);
   });

@@ -13,8 +13,9 @@ fi
 
 case "${1:-}" in
   setup)
-    WORKSPACE_NAME="ci_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}${2:+_$2}"
-    # Mêmes identifiants que scripts/conductor-setup.sh (minuscules et underscores).
+    # Mêmes identifiants que scripts/conductor-setup.sh : minuscules, chiffres et underscores (ex. suffixe « node22.x »).
+    SUFFIX=$(printf '%s' "${2:-}" | tr 'A-Z' 'a-z' | tr -c 'a-z0-9' '_')
+    WORKSPACE_NAME="ci_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}${SUFFIX:+_$SUFFIX}"
     PROJECT_NAME=$(node -p "require('./package.json').name.replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()")
     export WORKSPACE_NAME PROJECT_NAME
     # Écrits avant la création : l'étape de suppression les retrouve même si la création échoue à mi-chemin.

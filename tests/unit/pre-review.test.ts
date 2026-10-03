@@ -3,13 +3,18 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
+interface RouteConfig {
+  dirs: string[];
+  ignore: string[];
+}
+
 interface PreReview {
   globMatch(glob: string, file: string): boolean;
   workMode(hasLease: boolean, branch: string): string;
   isFixBranch(branch: string): boolean;
   hasRegressionTest(files: string[]): boolean;
-  routeDirs(pkg: unknown): string[];
-  isRouteFile(file: string, dirs: string[]): boolean;
+  routeConfig(pkg: unknown): RouteConfig;
+  isRouteFile(file: string, routes: RouteConfig): boolean;
   isThinRoute(text: string): boolean;
   labelGlobs(text: string, label: string): string[];
   labelNames(text: string): string[];
@@ -139,24 +144,30 @@ describe("scripts/pre-review.mjs", () => {
     expect(mod.hasRegressionTest(["tests/holdout/SPEC-0001.test.ts"])).toBe(false);
   });
 
-  it("reads the route directories declared in package.json", () => {
-    expect(mod.routeDirs({})).toEqual([]);
-    expect(mod.routeDirs({ factory: { contractRunners: {} } })).toEqual([]);
-    expect(mod.routeDirs({ factory: { routeDirs: ["mobile/app"] } })).toEqual(["mobile/app"]);
-    expect(() => mod.routeDirs({ factory: { routeDirs: "mobile/app" } })).toThrow(/factory.routeDirs/);
-    expect(() => mod.routeDirs({ factory: { routeDirs: [1] } })).toThrow(/factory.routeDirs/);
+  it("reads the file-based routing declared in package.json", () => {
+    expect(mod.routeConfig({})).toEqual({ dirs: [], ignore: [] });
+    expect(mod.routeConfig({ factory: { contractRunners: {} } })).toEqual({ dirs: [], ignore: [] });
+    expect(mod.routeConfig({ factory: { routeDirs: ["mobile/app"], routeIgnore: ["_layout.tsx"] } })).toEqual({
+      dirs: ["mobile/app"],
+      ignore: ["_layout.tsx"],
+    });
+    expect(() => mod.routeConfig({ factory: { routeDirs: "mobile/app" } })).toThrow(/factory.routeDirs/);
+    expect(() => mod.routeConfig({ factory: { routeIgnore: [1] } })).toThrow(/factory.routeIgnore/);
   });
 
-  it("treats only screens of a route directory as routes, not layouts, special files or tests", () => {
-    const dirs = ["mobile/app"];
-    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", dirs)).toBe(true);
-    expect(mod.isRouteFile("mobile/app/events/[id].tsx", dirs)).toBe(true);
-    expect(mod.isRouteFile("mobile/app/(tabs)/_layout.tsx", dirs)).toBe(false);
-    expect(mod.isRouteFile("mobile/app/+not-found.tsx", dirs)).toBe(false);
-    expect(mod.isRouteFile("mobile/app/events/id.test.tsx", dirs)).toBe(false);
-    expect(mod.isRouteFile("mobile/app/icon.png", dirs)).toBe(false);
-    expect(mod.isRouteFile("mobile/src/features/events/screens/EventScreen.tsx", dirs)).toBe(false);
-    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", [])).toBe(false);
+  it("treats only screens of a route directory as routes, not ignored files or tests", () => {
+    const routes = { dirs: ["mobile/app"], ignore: ["_layout.tsx", "+*"] };
+    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", routes)).toBe(true);
+    expect(mod.isRouteFile("mobile/app/events/[id].tsx", routes)).toBe(true);
+    expect(mod.isRouteFile("mobile/app/(tabs)/_layout.tsx", routes)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/+not-found.tsx", routes)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/events/id.test.tsx", routes)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/icon.png", routes)).toBe(false);
+    expect(mod.isRouteFile("mobile/src/features/events/screens/EventScreen.tsx", routes)).toBe(false);
+    expect(mod.isRouteFile("mobile/app/(tabs)/explore.tsx", { dirs: [], ignore: [] })).toBe(false);
+    // Sans `routeIgnore`, un layout est contrôlé comme une route : rien n'est supposé du framework.
+    expect(mod.isRouteFile("web/app/layout.tsx", { dirs: ["web/app"], ignore: [] })).toBe(true);
+    expect(mod.isRouteFile("web/app/layout.tsx", { dirs: ["web/app"], ignore: ["layout.tsx"] })).toBe(false);
   });
 
   it("accepts a route that only re-exports a screen and rejects one with logic", () => {
