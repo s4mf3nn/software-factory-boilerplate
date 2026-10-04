@@ -5,7 +5,8 @@
 // Usage :
 //   node scripts/plan-gate.mjs check <SPEC-XXXX> [T#]   plan PRÊT (et tâche) sur la base, dépendances livrées
 //   node scripts/plan-gate.mjs deps <SPEC-XXXX>         dépendances livrées seulement (au début de /plan)
-//   node scripts/plan-gate.mjs lint <SPEC-XXXX>         plan local, avant sa PR : SPEC-0000 a une tâche par groupe
+//   node scripts/plan-gate.mjs lint <SPEC-XXXX>         plan local, avant sa PR : SPEC-0000 a une tâche par groupe,
+//                                                       une conception par tâche de risque moyen ou élevé
 // Dépendances : ligne `Dépend de : SPEC-XXXX, SPEC-YYYY` (ou `aucune`) de spec.md sur la base ; sans cette ligne, aucune.
 // Une spec est livrée quand elle a un contrat sur la base et qu'aucun de ses fichiers n'a plus de `.skip` : c'est la
 // fusion de sa tâche de clôture, le même signal que celui qui active ses scénarios cachés (scripts/holdout.mjs).
@@ -111,6 +112,34 @@ export function sequentialProblem(spec, plan) {
   return `le plan de ${spec} met plusieurs tâches dans un même groupe (ou hors de tout groupe) : le socle s'exécute une tâche à la fois, un groupe « ## Groupe N » par tâche.`;
 }
 
+/** Identifiants des tâches de risque moyen ou élevé sans bloc `- Conception :`. */
+export function tasksWithoutDesign(plan) {
+  const missing = [];
+  let task = null;
+  const close = () => {
+    if (task?.risky && !task.designed) missing.push(task.id);
+  };
+  for (const line of plan.split("\n")) {
+    const heading = /^### (T\d+)\s*:/.exec(line);
+    if (heading || line.startsWith("## ")) {
+      close();
+      task = heading ? { id: heading[1], risky: false, designed: false } : null;
+    } else if (task && /^- Risque\s*:\s*(moyen|élevé)/i.test(line)) task.risky = true;
+    else if (task && /^- Conception\s*:/.test(line)) task.designed = true;
+  }
+  close();
+  return missing;
+}
+
+// La forme du code (fichiers, signatures, appels) se décide dans la PR de plan, relue par l'humain : la changer
+// après coup, en revue de code, coûte une tâche entière.
+/** Message si une tâche de risque moyen ou élevé n'a pas de conception, sinon null. */
+export function designProblem(plan) {
+  const missing = tasksWithoutDesign(plan);
+  if (!missing.length) return null;
+  return `tâche(s) de risque moyen ou élevé sans bloc « - Conception : » (arborescence, signatures, appels, ordre de construction, scénarios de changement) : ${missing.join(", ")}.`;
+}
+
 /** Contrôle le plan local, avant sa PR (`/plan`) : `{ ok, message }`. */
 export function lintPlan(spec) {
   if (!SPEC_ID.test(spec ?? ""))
@@ -122,7 +151,8 @@ export function lintPlan(spec) {
         .filter((p) => isSpecFile(p, spec, "plan.md") && fs.existsSync(p))
     : [];
   if (paths.length !== 1) return { ok: false, message: `${spec} : pas de plan.md unique dans specs/.` };
-  const problem = sequentialProblem(spec, fs.readFileSync(paths[0], "utf8"));
+  const plan = fs.readFileSync(paths[0], "utf8");
+  const problem = sequentialProblem(spec, plan) ?? designProblem(plan);
   return problem ? { ok: false, message: `${paths[0]} : ${problem}` } : { ok: true, message: `${paths[0]} : OK.` };
 }
 

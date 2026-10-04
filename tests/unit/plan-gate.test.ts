@@ -219,6 +219,8 @@ describe("scripts/plan-gate.mjs, bootstrap plan", () => {
   interface PlanGate {
     tasksPerGroup(plan: string): number[];
     sequentialProblem(spec: string, plan: string): string | null;
+    tasksWithoutDesign(plan: string): string[];
+    designProblem(plan: string): string | null;
   }
   const load = async () => (await import(pathToFileURL(path.resolve("scripts/plan-gate.mjs")).href)) as PlanGate;
 
@@ -250,6 +252,32 @@ describe("scripts/plan-gate.mjs, bootstrap plan", () => {
     expect(lint(repo, "bad").stderr).toContain("Identifiant de spec invalide");
     fs.writeFileSync(path.join(repo, "specs/SPEC-0000-bootstrap/plan.md"), SEQUENTIAL);
     expect(lint(repo, "SPEC-0000").status).toBe(0);
+  });
+
+  it("requires a design block on medium and high risk tasks", async () => {
+    const mod = await load();
+    const task = (id: string, risk: string, design: string) =>
+      `### ${id} : titre\n- Périmètre : src/a\n- Risque : ${risk} (raison)\n${design}`;
+    const design = "- Conception :\n  ```diff\n  +src/a/service.ts\n  ```\n";
+    const plan = (...tasks: string[]) => `# Plan\nStatut : PRÊT\n\n## Groupe 1\n${tasks.join("\n")}`;
+    expect(mod.tasksWithoutDesign(plan(task("T1", "faible", ""), task("T2", "moyen", design)))).toEqual([]);
+    expect(mod.tasksWithoutDesign(plan(task("T1", "moyen", ""), task("T2", "élevé", "")))).toEqual(["T1", "T2"]);
+    // La conception d'une tâche ne vaut pas pour la précédente.
+    expect(mod.tasksWithoutDesign(plan(task("T1", "élevé", ""), task("T2", "moyen", design)))).toEqual(["T1"]);
+    expect(mod.designProblem(plan(task("T1", "faible", "")))).toBeNull();
+    expect(mod.designProblem(plan(task("T1", "moyen", "")))).toContain("« - Conception : »");
+  });
+
+  it("lint refuses a plan whose risky task has no design block", () => {
+    const risky = "# Plan\nStatut : PRÊT\n\n## Groupe 1\n### T1 : api\n- Risque : élevé (auth)\n";
+    const repo = newRepo({}, { "specs/SPEC-0002-a/plan.md": risky });
+    const lint = () => spawnSync("node", [script, "lint", "SPEC-0002"], { cwd: repo, encoding: "utf8", env: gitEnv });
+    const bad = lint();
+    expect(bad.status).toBe(1);
+    expect(bad.stderr).toContain("sans bloc « - Conception : »");
+    expect(bad.stderr).toContain("T1");
+    fs.writeFileSync(path.join(repo, "specs/SPEC-0002-a/plan.md"), `${risky}- Conception :\n  entrypoint\n`);
+    expect(lint().status).toBe(0);
   });
 
   it("check refuses a merged SPEC-0000 plan with parallel tasks", () => {
