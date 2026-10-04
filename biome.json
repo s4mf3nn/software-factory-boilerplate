@@ -24,6 +24,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["src/**", "**/src/**"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noConsole": "error" },
+          "style": { "noNonNullAssertion": "error" },
+          "complexity": { "noExcessiveCognitiveComplexity": "error" }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
