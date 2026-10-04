@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -57,6 +58,7 @@ interface Progress {
 interface ProgressModule {
   parseRoadmap(text: string): { order: number; milestone: string; spec: string | null; dependsOn: string[] }[];
   readFromDisk(dir: string): Map<string, string>;
+  readFromGit(ref: string, dir: string): Map<string, string>;
   computeProgress(input: {
     files: Map<string, string>;
     prs?: Pr[];
@@ -297,6 +299,13 @@ describe("scripts/progress.mjs", () => {
       expect(commands(result)).not.toContain("/implement SPEC-0002 T1");
     });
 
+    it("blocks a spec whose dependency line is unreadable, as plan-gate does", () => {
+      const files = project({ "specs/SPEC-0001-delivery/spec.md": spec("SPEC-0001", "le socle") });
+      const result = progress.computeProgress({ files, now: NOW });
+      expect(kinds(result, "SPEC-0001")).toEqual(["dependency-unreadable"]);
+      expect(commands(result)).not.toContain("/plan SPEC-0001");
+    });
+
     it("stops at a blocked plan", () => {
       const files = project({ "specs/SPEC-0002-short-link/plan.md": PLAN.replace("PRÊT", "BLOQUÉ") });
       const result = progress.computeProgress({ files, now: NOW });
@@ -383,6 +392,34 @@ describe("scripts/progress.mjs", () => {
     it("reports red gates on main as a project blocker", () => {
       const result = progress.computeProgress({ files: project(), gates: "failure", now: NOW });
       expect(kinds(result, null)).toEqual(["gates-red"]);
+    });
+  });
+
+  describe("readFromGit", () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "progress-git-"));
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-c", "user.name=test", "-c", "user.email=test@example.test", ...args], {
+        cwd: dir,
+        stdio: "ignore",
+      });
+    fs.mkdirSync(path.join(dir, "specs/SPEC-0000-bootstrap/maquettes"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "specs/ROADMAP.md"), ROADMAP);
+    fs.writeFileSync(path.join(dir, "specs/SPEC-0000-bootstrap/maquettes/home.png"), "binary");
+    fs.writeFileSync(path.join(dir, "README.md"), "untracked by the dashboard");
+    git("init", "--quiet");
+    git("add", ".");
+    git("-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "chore: fixture");
+    // Modifié après le commit : la lecture doit rendre l'état de la référence, pas celui de l'arbre de travail.
+    fs.writeFileSync(path.join(dir, "specs/ROADMAP.md"), "changed locally");
+
+    it("reads the tracked text files of a git reference", () => {
+      const files = progress.readFromGit("HEAD", dir);
+      expect([...files.keys()]).toEqual(["specs/ROADMAP.md"]);
+      expect(files.get("specs/ROADMAP.md")).toBe(ROADMAP);
+    });
+
+    it("throws on a missing reference", () => {
+      expect(() => progress.readFromGit("origin/main", dir)).toThrow();
     });
   });
 

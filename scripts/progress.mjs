@@ -45,8 +45,8 @@ export function readFromGit(ref, cwd = process.cwd()) {
       maxBuffer: 64 * 1024 * 1024,
       stdio: ["ignore", "pipe", "pipe"],
     });
-  const paths = git("ls-tree", "-r", "--name-only", ref, "--", ...TRACKED)
-    .split("\n")
+  const paths = git("ls-tree", "-r", "-z", "--name-only", ref, "--", ...TRACKED)
+    .split("\0")
     .filter((p) => TEXT_FILE.test(p));
   return new Map(paths.map((p) => [p, git("show", `${ref}:${p}`)]));
 }
@@ -129,6 +129,7 @@ function readSpec(files, specPath) {
   const criteria = [...text.matchAll(/^- \*\*(C[AU]\d+)\*\*/gm)].map((m) => m[1]);
   const plan = readPlan(files.get(specPath.replace(/spec\.md$/, "plan.md")));
   const covered = new Set(plan?.tasks.flatMap((task) => task.criteria) ?? []);
+  const dependencies = parseDependencies(text);
   const questions = stripComments(section(text.split("\n"), "Questions ouvertes") ?? "");
   return {
     id,
@@ -136,7 +137,8 @@ function readSpec(files, specPath) {
     title: /^# SPEC-\d+\s*:\s*(.+)$/m.exec(text)?.[1].trim() ?? id,
     declaredStatus: headerValue(text, "Statut"),
     risk: headerValue(text, "Risque estimé"),
-    dependsOn: parseDependencies(text).deps ?? [],
+    dependsOn: dependencies.deps ?? [],
+    dependencyError: dependencies.error ?? null,
     criteria,
     uncoveredCriteria: plan ? criteria.filter((c) => !covered.has(c)) : [],
     openQuestions: questions.split("\n").filter((line) => line.startsWith("- ")).length,
@@ -155,6 +157,7 @@ function unwrittenSpec(row) {
     declaredStatus: "",
     risk: "",
     dependsOn: row.dependsOn,
+    dependencyError: null,
     criteria: [],
     uncoveredCriteria: [],
     openQuestions: 0,
@@ -275,6 +278,8 @@ function specBlockers(spec, specs, now) {
   if (spec.contract.todos > 0)
     add("contract-todo", `${spec.contract.todos} test(s) de contrat encore en it.todo : à écrire par l'humain`);
   if (spec.openQuestions > 0) add("open-questions", `${spec.openQuestions} question(s) ouverte(s) dans la spec`);
+  // Même refus que `plan-gate.mjs` : une ligne illisible ne vaut pas « aucune dépendance ».
+  if (spec.dependencyError) add("dependency-unreadable", spec.dependencyError);
   if (missing.length > 0) add("dependency", `dépend de ${missing.join(", ")}, pas encore livrée(s)`);
   if (spec.plan && spec.plan.status !== "PRÊT") add("plan-blocked", `plan ${spec.plan.status || "sans statut"}`);
   if (spec.uncoveredCriteria.length > 0)
@@ -298,10 +303,10 @@ function specActions(spec, blockers) {
   }
   if (spec.stage === "specified") {
     if (spec.docPr) return [action(`/land ${spec.docPr.number}`, "PR de plan ouverte : à relire et fusionner")];
-    if (blocked("contract-todo", "open-questions", "dependency")) return [];
+    if (blocked("contract-todo", "open-questions", "dependency", "dependency-unreadable")) return [];
     return [action(`/plan ${spec.id}`, "spec fusionnée, dépendances livrées")];
   }
-  if (isDone(spec) || blocked("plan-blocked", "dependency")) return [];
+  if (isDone(spec) || blocked("plan-blocked", "dependency", "dependency-unreadable")) return [];
   const toLand = spec.plan.tasks
     .filter((task) => task.status === "in-review" && !isRejection(task.review.lastVerdict))
     .map((task) => action(`/land ${task.pr.number}`, `${task.id} en revue`));

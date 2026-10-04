@@ -239,9 +239,17 @@ function readMain() {
   return readFromGit("origin/main");
 }
 
+/** Avancement du projet, ou null si origin/main est illisible : le reste du tableau de bord reste produit. */
 function collectProgress(prs, local) {
+  let files;
+  try {
+    files = local ? readFromDisk() : readMain();
+  } catch {
+    console.error("Avancement indisponible : origin/main est illisible (dépôt sans remote ?). Relance avec --local.");
+    return null;
+  }
   return computeProgress({
-    files: local ? readFromDisk() : readMain(),
+    files,
     prs,
     leases: readLeases(),
     lastRelease: lastRun("release", "--status", "success"),
