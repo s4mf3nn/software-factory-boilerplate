@@ -301,7 +301,7 @@ describe("scripts/pre-review.mjs", () => {
     expect(mod.checkSummary(null, [])).toEqual([expect.stringContaining("absent")]);
   });
 
-  it("lit les points d'entrée publics des features", () => {
+  it("reads the public entry points of features", () => {
     expect(mod.featureEntries({})).toEqual(["index"]);
     expect(mod.featureEntries({ factory: { featureEntries: ["server.ts", "client.tsx"] } })).toEqual([
       "index",
@@ -311,7 +311,7 @@ describe("scripts/pre-review.mjs", () => {
     expect(() => mod.featureEntries({ factory: { featureEntries: "server.ts" } })).toThrow(/factory.featureEntries/);
   });
 
-  it("extrait les spécificateurs d'import", () => {
+  it("extracts import specifiers", () => {
     const text = [
       'import { a } from "../links/repo";',
       "import b from '../links/service.ts';",
@@ -330,7 +330,7 @@ describe("scripts/pre-review.mjs", () => {
     ]);
   });
 
-  it("refuse l'import de l'intérieur d'une autre feature", () => {
+  it("rejects imports of another feature's internals", () => {
     const check = (file: string, text: string) => mod.boundaryViolations(file, text, ["index", "server"]);
     const file = "src/features/events/service.ts";
     expect(check(file, 'import { x } from "../links/repo";')).toEqual(["../links/repo"]);
@@ -339,12 +339,14 @@ describe("scripts/pre-review.mjs", () => {
     expect(check(file, 'const m = await import("../links/repo");')).toEqual(["../links/repo"]);
   });
 
-  it("permet shared, sa propre feature et les points d'entrée publics", () => {
+  it("allows shared, its own feature and public entry points", () => {
     const check = (file: string, text: string) => mod.boundaryViolations(file, text, ["index", "server"]);
     const file = "src/features/events/service.ts";
     expect(check(file, 'import { x } from "../links";')).toEqual([]);
     expect(check(file, 'import { x } from "../links/index";')).toEqual([]);
     expect(check(file, 'import { x } from "../links/server.ts";')).toEqual([]);
+    expect(check(file, 'import { x } from "../links/index.js";')).toEqual([]);
+    expect(check(file, 'import { x } from "../links/server.mjs";')).toEqual([]);
     expect(check(file, 'import { x } from "@/features/links";')).toEqual([]);
     expect(check(file, 'import { x } from "../../shared/clock";')).toEqual([]);
     expect(check(file, 'import { x } from "./repo";')).toEqual([]);
@@ -353,7 +355,7 @@ describe("scripts/pre-review.mjs", () => {
     expect(check("src/app.ts", 'import { x } from "./features/links/repo";')).toEqual([]);
   });
 
-  it("applique la règle dans un dépôt à plusieurs applications", () => {
+  it("applies the rule in a multi-application repository", () => {
     const file = "apps/api/src/features/events/service.ts";
     expect(mod.boundaryViolations(file, 'import { x } from "../links/repo";', ["index"])).toEqual(["../links/repo"]);
     expect(mod.boundaryViolations(file, 'import { x } from "@/features/links/repo";', ["index"])).toEqual([

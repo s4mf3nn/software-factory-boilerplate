@@ -212,9 +212,12 @@ export function isThinRoute(text) {
  * (noms de fichiers, ex. `server.ts` et `client.tsx` pour une feature servie par deux runtimes).
  */
 export function featureEntries(pkg) {
-  const declared = factoryList(pkg, "featureEntries").map((file) => file.replace(/\.tsx?$/, ""));
+  const declared = factoryList(pkg, "featureEntries").map((file) => file.replace(MODULE_EXTENSION, ""));
   return ["index", ...declared];
 }
+
+// Extension d'un module TypeScript ou JavaScript, avec ou sans suffixe de résolution (`index.js` pour `index.ts`).
+const MODULE_EXTENSION = /\.[cm]?[jt]sx?$/;
 
 // Dossier d'une feature : `[<racine>/]src/features/<nom>/<reste>`.
 const FEATURE_PATH = /^(?:(.*)\/)?src\/features\/([^/]+)\/(.*)$/;
@@ -244,7 +247,7 @@ export function boundaryViolations(file, text, entries) {
     const target = importTarget(file, specifier);
     const other = target === null ? null : FEATURE_PATH.exec(target);
     if (!other || other[2] === own[2]) return false;
-    const inside = other[3].replace(/\.tsx?$/, "");
+    const inside = other[3].replace(MODULE_EXTENSION, "");
     return inside !== "" && !entries.includes(inside);
   });
 }
