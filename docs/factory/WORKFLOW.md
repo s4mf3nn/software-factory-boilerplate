@@ -2,7 +2,7 @@
 
 ## Une tâche et ses barrières
 
-Le schéma suit une tâche de `/implement` à l'archivage de son workspace (étapes 3 à 9 du cycle ci-dessous). Un losange est une barrière : tant qu'elle refuse, la tâche n'avance pas. Toutes sont tenues par un script, sauf le verdict du relecteur. Un hexagone est une décision de l'humain, un rectangle le travail d'un agent, une forme arrondie une action faite par un script.
+Le schéma suit une tâche de `/implement` à l'archivage de son workspace (étapes 3 à 9 du cycle ci-dessous). Un losange est une barrière : tant qu'elle refuse, la tâche n'avance pas. La plupart sont tenues par un script ; le verdict du relecteur et les contrôles de `/land` le sont par un agent. Un hexagone est une décision de l'humain, un rectangle le travail d'un agent, une forme arrondie une action faite par un script.
 
 ```mermaid
 flowchart TB
@@ -39,11 +39,12 @@ flowchart TB
   subgraph merge["6 et 7. Arbitrage et merge"]
     direction TB
     arbitrage{{"Lecture de l'humain<br/>spec, tests, résumé, verdict,<br/>puis le code signalé"}}:::humain
-    land{"/land<br/>main verte, checks verts, branche à jour"}:::script
+    land{"/land<br/>main verte, checks verts, branche à jour"}:::agent
     confirmation{{"Confirmation explicite<br/>si risk:high ou contract-change"}}:::humain
     squash(["Squash-merge sur main"]):::script
     arbitrage --> land
-    land -- "oui" --> confirmation --> squash
+    land -- "risk:high ou<br/>contract-change" --> confirmation --> squash
+    land -- "autre PR" --> squash
   end
 
   archivage(["8 et 9. Archivage du workspace : bail libéré,<br/>puis groupe suivant du plan"]):::script
@@ -57,16 +58,18 @@ flowchart TB
   stopPlan(["Arrêt : fusionner d'abord la PR de plan"]):::arret
   stopBail(["Arrêt : un autre agent tient ces chemins"]):::arret
   stopRevue(["Arrêt : proposer un redécoupage"]):::arret
-  resolve["/resolve puis /ship<br/>dans le workspace de la tâche"]:::agent
+  stopLand(["Arrêt : /land liste ce qui échoue,<br/>l'humain décide de la suite"]):::arret
+  resolve["/resolve, lancé par l'humain<br/>dans le workspace de la tâche"]:::agent
 
   planGate -- "non" --> stopPlan
   lease -- "non" --> stopBail
   preReview -- "violations" --> code
   reviewer -- "à corriger,<br/>3 passages au plus" --> code
   reviewer -- "pas OK après<br/>3 passages" --> stopRevue
-  prePush -- "revue périmée" --> preReview
+  prePush -- "revue absente<br/>ou périmée" --> preReview
   ci -- "rouge" --> code
-  land -- "retard ou conflit" --> resolve --> prePush
+  land -- "retard ou conflit" --> resolve --> ship
+  land -- "main ou check rouge,<br/>PR en brouillon" --> stopLand
 
   classDef humain fill:#fde68a,stroke:#b45309,color:#1f2937
   classDef agent fill:#bfdbfe,stroke:#1d4ed8,color:#1f2937

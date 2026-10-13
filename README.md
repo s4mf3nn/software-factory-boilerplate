@@ -19,7 +19,8 @@ flowchart TB
     prSpec{{"PR de spec<br/>l'humain relit et fusionne"}}:::humain
     plan["/plan<br/>tâches, périmètres, conception"]:::agent
     prPlan{{"PR de plan<br/>l'humain relit et fusionne"}}:::humain
-    roadmap --> spec --> prSpec --> plan --> prPlan
+    prCadrage{{"PR de cadrage<br/>l'humain relit et fusionne"}}:::humain
+    roadmap --> prCadrage --> spec --> prSpec --> plan --> prPlan
   end
 
   subgraph comment["Le comment : produit par les agents, un workspace isolé par tâche"]
@@ -63,7 +64,7 @@ flowchart TB
   classDef script fill:#bbf7d0,stroke:#15803d,color:#1f2937
 ```
 
-Lecture du schéma : un hexagone est une décision de l'humain, un rectangle le travail d'un agent, une forme arrondie un contrôle fait par un script.
+Lecture du schéma : un hexagone est une décision de l'humain, un rectangle le travail d'un agent, une forme arrondie un contrôle fait par un script. Chaque tâche suit le circuit `pnpm verify`, `/review`, `/ship` dans son propre workspace : un bail, une revue et une PR par tâche.
 
 Le cycle complet est décrit dans `docs/factory/WORKFLOW.md` (avec le schéma détaillé d'une tâche et de ses barrières), et chaque concept (bail, périmètre, test de contrat, verdict, patch-id…) est défini dans `docs/factory/LEXIQUE.md`.
 
