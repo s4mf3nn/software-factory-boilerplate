@@ -34,7 +34,7 @@ Mesures qui limitent la consommation de la factory. Le choix d'un modèle moins 
 | 21 | Détail des conventions de code hors de `CLAUDE.md`, lu à la demande | `CLAUDE.md`, `docs/factory/CONVENTIONS.md` |
 | 22 | Plafonds de taille : spec ~8 000 caractères, plan ~10 000 ; lecture du brief et des docs de cadrage par sections ; cache de bibliothèques interrogé par `grep` ; requêtes `query-docs` ciblées sur un symbole | `new-spec.md`, `planner.md`, `roadmap.md`, `CONTEXT7.md` |
 | 23 | `reviewer.md` allégé : points d'une PR de plan dans `REVIEW-PLAN.md` (lu seulement pour ces PR) ; sortie des relecteurs limitée à ~40 lignes | `reviewer.md`, `spec-reviewer.md`, `docs/factory/REVIEW-PLAN.md` |
-| 24 | Traces de décision déplacées dans `docs/factory/archive/` (ne se lisent pas par défaut) | `BATTLETEST.md`, `SPEC-CONTRAINTES-TECHNO.md` |
+| 24 | Traces de décision déplacées dans `docs/factory/archive/` (ne se lisent pas par défaut) | `archive/BATTLETEST.md`, `archive/SPEC-CONTRAINTES-TECHNO.md` |
 
 ## À vérifier sur chaque poste
 

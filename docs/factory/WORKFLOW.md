@@ -77,7 +77,7 @@ flowchart TB
   classDef arret fill:#fecaca,stroke:#b91c1c,color:#1f2937
 ```
 
-Si c'est l'étape « Scénarios cachés » de la CI qui est rouge, le retour à l'agent ne se fait pas tel quel : voir « Scénarios cachés », « En cas d'échec ».
+Si c'est le job `holdout` de la CI qui est rouge, le retour à l'agent ne se fait pas tel quel : voir « Scénarios cachés », « En cas d'échec ».
 
 ## Cycle d'une fonctionnalité
 
