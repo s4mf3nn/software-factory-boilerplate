@@ -130,7 +130,7 @@ Les tests de contrat sont visibles de l'agent producteur : il peut les faire pas
 
 - **Écriture** : `/new-spec` écrit `tests/holdout/SPEC-XXXX.test.ts` (ou `.test.tsx`, ou des fichiers suffixés `SPEC-XXXX.<suffixe>.test.ts(x)` comme le contrat ; 2 à 4 parcours de bout en bout, autres données que les tests de contrat). Tu les valides dans la PR de spec. Ensuite ils sont immuables, comme le contrat (`scripts/check-contract.mjs`, label `contract-change`).
 - **Invisibilité** : `/implement` commence par `node scripts/holdout.mjs hide`, qui retire le dossier du workspace (sparse-checkout, propre au workspace). `pnpm verify` ne les joue pas, et la pré-revue refuse un workspace de tâche où ils sont visibles. C'est une barrière contre l'accident, pas contre un agent qui chercherait à tricher : l'historique git les contient toujours.
-- **Exécution** : en CI, étape « Scénarios cachés » du job `gates`. Les scénarios d'une spec ne sont joués que lorsqu'aucun de ses fichiers de contrat n'a plus de `.skip`. Un fichier de test de `tests/acceptance/` ou `tests/holdout/` au nom non reconnu fait échouer l'étape : il ne serait jamais joué. Les logs ne donnent qu'un décompte par spec.
+- **Exécution** : en CI, job `holdout`. Les scénarios d'une spec ne sont joués que lorsqu'aucun de ses fichiers de contrat n'a plus de `.skip`. Un fichier de test de `tests/acceptance/` ou `tests/holdout/` au nom non reconnu fait échouer l'étape : il ne serait jamais joué. Les logs ne donnent qu'un décompte par spec.
 - **En cas d'échec** : lance toi-même `node scripts/holdout.mjs run --details` sur la branche de la PR, dans le dépôt principal (pas dans le workspace de la tâche). Ne donne pas le scénario à l'agent. Soit l'implémentation est trop étroite : relance la tâche en nommant le critère de la spec qui n'est pas tenu, ou précise la spec. Soit le scénario exigeait plus que la spec : corrige-le dans une PR `contract-change`.
 
 ## Règles de parallélisme
@@ -163,3 +163,7 @@ Prérequis de la phase 3, où plus personne ne lit les PR `risk:low` : des scén
 ## Sobriété en tokens
 
 Les mesures qui limitent la consommation (extrait de tâche, cache Context7, vérification silencieuse, pré-revue par script, niveaux de revue, modèles par commande) sont décrites dans `docs/factory/TOKENS.md`.
+
+## Tableau d'avancement
+
+`docs/PROGRESS.md` donne en un coup d'œil, pour chaque spec, où en sont la spec, le plan, l'implémentation, la livraison et la mise en production. Il est généré par `scripts/progress-table.mjs` (`pnpm progress` pour le produire en local) et recommité sur `main` par le workflow `progress` après chaque fusion (créé par le premier run). Ne jamais l'éditer à la main.
